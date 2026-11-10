@@ -2151,10 +2151,25 @@ function mockTurn(camp,text,roll,opening){
  return out}
 
 /* ============================== DEEPSEEK ============================== */
+let DS_ENDPOINT='';const OR_BASE='https://openrouter.ai/api/v1';const DS_DEFAULT='https://api.deepseek.com/chat/completions';
+const dsKeyLS=()=>{try{return localStorage.getItem('deepseek_api_key')||''}catch(e){return ''}};
+function dsUrl(u){u=String(u||'').trim();if(!u)return DS_DEFAULT;const m=u.match(/^(https?):\/\/([^\/:?#]+)(:\d+)?([^?#]*)/i);if(!m)return null;
+ if(m[1].toLowerCase()==='http'&&!/^(localhost|127\.0\.0\.1)$/i.test(m[2]))return null;
+ let p=m[4].replace(/\/{2,}/g,'/').replace(/\/+$/,'');while(/\/chat\/completions$/i.test(p))p=p.replace(/\/chat\/completions$/i,'').replace(/\/+$/,'');
+ return m[1].toLowerCase()+'://'+m[2]+(m[3]||'')+p+'/chat/completions'}
+const OR_RE=/^https:\/\/([^\/]+\.)?openrouter\.ai\//i;
+const dsHeaders=(url,key)=>{const h={'Content-Type':'application/json',Authorization:`Bearer ${key}`};
+ if(OR_RE.test(url)){let o='';try{o=location.origin}catch(e){}h['HTTP-Referer']=(o&&o!=='null'&&/^https?:/i.test(o))?o:'https://localhost';h['X-Title']='Solo Text RPG Companion'}return h};
+function dsErr(e){const s=e&&e.status,m=String((e&&e.message)||e||'');
+ if(s===401)return 'Invalid API key (401). Check the key in Settings.';if(s===402)return 'Insufficient DeepSeek balance (402).';if(s===429)return 'Rate limit reached (429). Wait a moment and try again.';
+ if(s>=500)return 'DeepSeek server error ('+s+'). Try again shortly.';if(s)return 'Request failed (HTTP '+s+').';
+ if(/Failed to fetch|NetworkError|Load failed|network/i.test(m))return 'Network error. Check your connection or the endpoint URL in Settings.';return m.slice(0,140)||'Unknown error.'}
 async function deepseek(key,model,messages,max){
- const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify({model,messages,temperature:1.1,max_tokens:max||1500,stream:false})});
- if(!r.ok)throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,160));
- const j=await r.json();return j.choices[0].message.content}
+ const url=dsUrl(DS_ENDPOINT);if(!url)throw new Error('Custom endpoint must be a full https:// URL (http:// only for localhost).');
+ const r=await fetch(url,{method:'POST',headers:dsHeaders(url,key),body:JSON.stringify({model:String(model||'').trim()||'deepseek-chat',messages,temperature:1.1,max_tokens:max||1500,stream:false})});
+ if(!r.ok){const t=await r.text().catch(()=>'');const e=new Error('HTTP '+r.status+' '+t.slice(0,160));e.status=r.status;throw e}
+ let j;try{j=await r.json()}catch(e){throw new Error('The endpoint returned an unreadable response.')}
+ const m=j&&j.choices&&j.choices[0]&&j.choices[0].message;if(!m||typeof m.content!=='string'||!m.content.trim())throw new Error('The model returned an empty reply.');return m.content}
 function parseDM(raw){
  let json=null,text=raw;const m=raw.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i);
  if(m){try{json=JSON.parse(m[1])}catch(e){}text=raw.replace(m[0],'')}
@@ -3122,7 +3137,7 @@ function LoadoutBuilder({uni,eraId,L,setL,credLeft,ptsLeft,conv,cash,onConv}){
 /* ============================== SETTINGS ============================== */
 function Settings({S,setS,audioSet,dict,setDict,saves,setSaves,activeCamp,onClose,onExitCampaign,stock,saveStock}){
  const[exp,setExp]=useState('');const[expId,setExpId]=useState(activeCamp?activeCamp.id:(saves[0]?.id||''));
- const[imp,setImp]=useState('');const[msg,setMsg]=useState('');const[show,setShow]=useState(false);const[conf,setConf]=useState('');const[ping,setPing]=useState('');
+ const[imp,setImp]=useState('');const[msg,setMsg]=useState('');const[show,setShow]=useState(false);const[conf,setConf]=useState('');const[ping,setPing]=useState('');const[keyDraft,setKeyDraft]=useState(S.apiKey||'');const[keyMsg,setKeyMsg]=useState('');const[epDraft,setEpDraft]=useState(S.endpoint||'');const[epMsg,setEpMsg]=useState('');
  const doExport=()=>{const c=saves.find(s=>s.id===expId);if(!c){setMsg('Nothing to export.');return}
   const txt=JSON.stringify({app:'solo-text-rpg',version:1,campaign:c,dictionary:dict.filter(d=>d.scope.includes('all')||d.scope.includes(c.id))},null,1);setExp(txt);
   try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=(c.name||'campaign')+'.json';a.click()}catch(e){}
@@ -3130,7 +3145,10 @@ function Settings({S,setS,audioSet,dict,setDict,saves,setSaves,activeCamp,onClos
  const doImport=txt=>{try{const j=JSON.parse(txt);const c=j.campaign||j;if(!c.universe||!c.feed)throw new Error('Not a campaign file');
   const id=uid();setSaves([{...c,id},...saves]);if(Array.isArray(j.dictionary))setDict([...dict,...j.dictionary.map(d=>({...d,id:uid(),scope:d.scope.includes('all')?['all']:[id]}))]);setMsg('Imported "'+c.name+'".');setImp('')}catch(e){setMsg('Import failed: '+e.message)}};
  const sure=(k,fn)=>()=>{if(conf===k){fn();setConf('')}else setConf(k)};
- const test=async()=>{setPing('Pinging…');try{const t=await deepseek(S.apiKey,S.model,[{role:'user',content:'Reply with the single word: pong'}],8);setPing('✓ Connected: '+t.slice(0,40))}catch(e){setPing('✗ '+e.message+(String(e.message).includes('Failed to fetch')?' (browser blocked the request: network sandbox or CORS)':''))}};
+ const test=async()=>{setPing('Pinging…');try{const t=await deepseek(S.apiKey,S.model,[{role:'user',content:'Reply with the single word: pong'}],8);setPing('Connected: '+t.slice(0,40))}catch(e){setPing('Failed: '+dsErr(e))}};
+ const saveKey=()=>{const k=keyDraft.trim();if(!k){setKeyMsg('Enter a key first.');return}setKeyDraft(k);setS({...S,apiKey:k});try{localStorage.setItem('deepseek_api_key',k)}catch(e){}setKeyMsg('Key saved in this browser.')};
+ const clearKey=()=>{setKeyDraft('');setS({...S,apiKey:''});try{localStorage.removeItem('deepseek_api_key')}catch(e){}setKeyMsg('Key removed.');setPing('')};
+ const saveEp=()=>{const v=epDraft.trim();if(v&&!dsUrl(v)){setEpMsg('Use a full https:// URL (http:// only for localhost).');return}setS({...S,endpoint:v});setEpMsg(v?'Endpoint saved.':'Using the default DeepSeek endpoint.')};
  return <Modal wide title="Settings & Storage" onClose={onClose}>
   <Acc title="Appearance & Themes">
    <div className="grid gap-2 sm:grid-cols-3 mb-3">{[['midnight','Obsidian / Ice'],['springfield','Springfield at Night'],['cream','Paper Light / Minimal Cream']].map(([k,l])=><button key={k} className={'btn '+(S.theme===k?'btn-p':'')} onClick={()=>setS({...S,theme:k})}>{l}</button>)}</div>
@@ -3152,12 +3170,21 @@ function Settings({S,setS,audioSet,dict,setDict,saves,setSaves,activeCamp,onClos
    <div className="muted text-sm mb-2">One reusable default character per universe. It appears as a Load Stock Character button in the new-campaign wizard.</div>
    {UNIVERSES.filter(x=>x.active).map(x=><Acc sub key={x.id} title={x.name+(stock[x.id]?' · '+stock[x.id].name:'')}><StockEditor uni={x.id} stock={stock[x.id]} onSave={saveStock}/></Acc>)}</Acc>
   <LoreBibleSection defaultUni={activeCamp?activeCamp.universe:'all'} camp={activeCamp}/>
-  <Acc title="API Keys & Engine">
-   <label className="block mb-2"><span className="text-sm muted">DeepSeek API key (stored in this browser only)</span>
-    <div className="flex gap-2"><input className="input" type={show?'text':'password'} autoComplete="off" placeholder="sk-…" value={S.apiKey} onChange={e=>setS({...S,apiKey:e.target.value.trim()})}/><button className="btn" onClick={()=>setShow(!show)}><Ico n={show?'eyeoff':'eye'}/></button></div></label>
-   <label className="block mb-2"><span className="text-sm muted">Model</span><select className="input" value={S.model} onChange={e=>setS({...S,model:e.target.value})}><option>deepseek-chat</option><option>deepseek-reasoner</option></select></label>
-   <button className="btn" disabled={!S.apiKey} onClick={test}>Test connection</button>{ping&&<div className="text-sm mt-2 mono">{ping}</div>}
-   <div className="muted text-sm mt-2">No key? The built-in demo narrator keeps the game fully playable.</div></Acc>
+  <Acc title="AI Narrator &amp; API Settings">
+   <div data-ai-settings>
+   <div className="flex items-center gap-2 mb-2"><span className={'dot '+((S.apiKey||keyDraft)?(S.apiKey?'on':'warn'):'warn')}/><span className="mono text-xs" data-key-status>{S.apiKey?'Key saved - AI narration enabled':'No key saved - demo narrator active'}</span></div>
+   <label className="block mb-2"><span className="text-sm muted">DeepSeek API key (stored only in this browser, sent only to the endpoint below)</span>
+    <div className="flex gap-2"><input className="input" data-key-input type={show?'text':'password'} autoComplete="off" spellCheck="false" placeholder="sk-..." value={keyDraft} onChange={e=>{setKeyDraft(e.target.value);setKeyMsg('')}}/><button type="button" className="btn shrink-0" data-key-toggle aria-pressed={show} onClick={()=>setShow(!show)}>{show?'Hide':'Show'}</button></div></label>
+   <div className="flex flex-wrap gap-2 mb-1"><button type="button" className="btn btn-p" data-key-save disabled={!keyDraft.trim()} onClick={saveKey}>[ Save Key ]</button><button type="button" className="btn" data-key-clear disabled={!S.apiKey&&!keyDraft} onClick={clearKey}>[ Clear Key ]</button><button type="button" className="btn" data-key-test disabled={!S.apiKey} onClick={test}>[ Test Connection ]</button></div>
+   {keyMsg&&<div className="text-sm mono mb-1" role="status" data-key-msg>{keyMsg}</div>}{ping&&<div className="text-sm mono mb-1" data-ping>{ping}</div>}
+   <label className="block mb-2 mt-2"><span className="text-sm muted">Model ID (type any ID, or pick a suggestion)</span><input className="input" data-model list="ai-model-list" type="text" autoComplete="off" spellCheck="false" placeholder="deepseek-chat" value={S.model||''} onChange={e=>setS({...S,model:e.target.value.trim()})}/>
+    <datalist id="ai-model-list">{['deepseek-chat','deepseek-reasoner','deepseek/deepseek-chat','deepseek/deepseek-r1','google/gemini-2.0-flash-001'].map(m=><option key={m} value={m}/>)}</datalist></label>
+   <div className="flex flex-wrap gap-2 mb-2"><button type="button" className="btn" data-preset-openrouter onClick={()=>{setEpDraft(OR_BASE);setEpMsg('OpenRouter preset applied. Use your OpenRouter key.');setS({...S,endpoint:OR_BASE,model:'deepseek/deepseek-chat'})}}>[ OpenRouter Preset ]</button><button type="button" className="btn" data-preset-deepseek onClick={()=>{setEpDraft('');setEpMsg('DeepSeek preset applied. Use your DeepSeek key.');setS({...S,endpoint:'',model:'deepseek-chat'})}}>[ DeepSeek Preset ]</button></div>
+   <label className="block mb-2"><span className="text-sm muted">Custom endpoint URL (optional)</span>
+    <input className="input" data-endpoint type="url" autoComplete="off" spellCheck="false" placeholder={DS_DEFAULT} value={epDraft} onChange={e=>{setEpDraft(e.target.value);setEpMsg('')}}/></label>
+   <div className="flex flex-wrap gap-2 mb-1"><button type="button" className="btn" data-endpoint-save onClick={saveEp}>[ Save Endpoint ]</button><button type="button" className="btn" data-endpoint-reset onClick={()=>{setEpDraft('');setS({...S,endpoint:''});setEpMsg('Using the default DeepSeek endpoint.')}}>[ Use Default ]</button></div>
+   {epMsg&&<div className="text-sm mono" role="status" data-endpoint-msg>{epMsg}</div>}
+   <div className="muted text-sm mt-2">A base URL such as https://openrouter.ai/api/v1 gets /chat/completions appended (trailing slashes and a duplicate /chat/completions are trimmed). OpenRouter endpoints also receive the HTTP-Referer and X-Title headers. Each turn sends the compact living sheet (gear, environment, tone directive), recent history and your action. If a request fails, the narrative feed shows a short note and the demo narrator covers that turn. No key? The built-in demo narrator keeps the game fully playable.</div></div></Acc>
   <Acc title="Campaign & Data Management">
    <div className="mb-3"><div className="head text-lg mb-1">Export</div>
     <div className="flex gap-2"><select className="input" value={expId} onChange={e=>setExpId(e.target.value)}>{saves.map(s=><option key={s.id} value={s.id}>{s.name} · {getEra(s).name}</option>)}</select><button className="btn" onClick={doExport}>Export JSON</button></div>
@@ -3596,7 +3623,7 @@ function Game({camp,onUpdate,S,dict,setDict,saves,openSettings,onExit}){
  const[toasts,setToasts]=useState([]);const toast=msg=>{const id=uid();setToasts(t=>[...t,{id,msg}]);setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3200)};
  const forcedW=useRef(null);const[showEquip,setShowEquip]=useState(false);const[showShop,setShowShop]=useState(false);const[showNav,setShowNav]=useState(false);
  const[drawer,setDrawer]=useState(null);const[goalMode,setGoalMode]=useState(false);const[forceMode,setForceMode]=useState(false);const[sm,setSm]=useState({v:'root'});const[dlg,setDlg]=useState({});const[editId,setEditId]=useState(null);const[tumble,setTumble]=useState(false);
- const feedEnd=useRef(null);const started=useRef(false);const taRef=useRef(null);
+ const noKeyAt=useRef(0);const feedEnd=useRef(null);const started=useRef(false);const taRef=useRef(null);
  const u=UNI[camp.universe];
 const[lootId,setLootId]=useState(null);
  lgSet(S,camp);
@@ -3606,8 +3633,10 @@ const[lootId,setLootId]=useState(null);
 
  async function callEngine(roll,extra,opening){
   const c=ref.current;
-  if(S.apiKey){try{const raw=await deepseek(S.apiKey,S.model,buildMessages(c,dict,extra));return parseDM(raw)}
-   catch(e){addFeed({id:uid(),type:'system',text:'Engine error: '+e.message+'. Using demo narrator for this turn.'})}}
+  const apiKey=S.apiKey||dsKeyLS();
+  if(apiKey){try{const raw=await deepseek(apiKey,S.model,buildMessages(c,dict,extra));return parseDM(raw)}
+   catch(e){addFeed({id:uid(),type:'system',text:'NARRATOR: '+dsErr(e)+' Using the demo narrator for this turn.'})}}
+  else if(Date.now()-noKeyAt.current>60000){noKeyAt.current=Date.now();toast('No API key set. Enter your DeepSeek API key in Settings (gear icon) to enable AI narration.')}
   await sleep(450);
   const last=[...ref.current.feed].reverse().find(f=>f.type==='player');
   return mockTurn(ref.current,last?last.text:'',roll,opening)}
@@ -4095,14 +4124,15 @@ function newCamp({uni,era,mi,name,species,homeworld,cls,gender,age,notes,alignme
 
 /* ============================== APP ============================== */
 function App(){
- const[S,setS]=useState(()=>({theme:'midnight',turnEditing:false,manualDice:false,apiKey:'',model:'deepseek-chat',audio:{track:'swsynth',vol:0.4,playing:false},...lsGet('trpg_settings',{}),}));
+ const[S,setS]=useState(()=>{const s={theme:'midnight',turnEditing:false,manualDice:false,apiKey:'',model:'deepseek-chat',endpoint:'',audio:{track:'swsynth',vol:0.4,playing:false},...lsGet('trpg_settings',{})};if(!s.apiKey)s.apiKey=dsKeyLS();return s});
+ DS_ENDPOINT=S.endpoint||'';
  const[saves,setSaves]=useState(()=>lsGet('trpg_saves',[]));
  const[dict,setDict]=useState(()=>lsGet('trpg_dict',[]));
  const[stock,setStock]=useState(()=>({star_wars:lsGet('stock_char_star_wars',null),forgotten_realms:lsGet('stock_char_forgotten_realms',null)}));
  const saveStock=(u,v)=>{setStock(p=>({...p,[u]:v}));if(v)lsSet('stock_char_'+u,v);else{try{localStorage.removeItem('stock_char_'+u)}catch(e){}}};
  const[view,setView]=useState('home');const[activeId,setActiveId]=useState(null);const[showSet,setShowSet]=useState(false);
  useEffect(()=>{document.documentElement.setAttribute('data-theme',S.theme);const m=document.querySelector('meta[name=theme-color]');if(m)m.content=({cream:'#f4f2ee',midnight:'#07090c',springfield:'#0c0f1d'})[S.theme]},[S.theme]);
- useEffect(()=>lsSet('trpg_settings',S),[S]);useEffect(()=>lsSet('trpg_saves',saves),[saves]);useEffect(()=>lsSet('trpg_dict',dict),[dict]);
+ useEffect(()=>{const {apiKey,...rest}=S;lsSet('trpg_settings',rest);try{if(apiKey)localStorage.setItem('deepseek_api_key',apiKey);else localStorage.removeItem('deepseek_api_key')}catch(e){}},[S]);useEffect(()=>lsSet('trpg_saves',saves),[saves]);useEffect(()=>lsSet('trpg_dict',dict),[dict]);
  useEffect(()=>{try{const m={name:'Solo Text RPG Companion',short_name:'Text RPG',display:'standalone',start_url:'.',background_color:'#07090c',theme_color:'#07090c'};const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}},[]);
  const audioSet=p=>{const a={...S.audio,...p};setS(s=>({...s,audio:a}));if(a.playing)Snd.play(a.track,a.vol);else{Snd.stop()}if(!('track' in p)&&!('playing' in p))Snd.vol(a.vol)};
  const camp=saves.find(s=>s.id===activeId);
