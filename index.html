@@ -95,6 +95,12 @@ body{overscroll-behavior:none;-webkit-font-smoothing:antialiased;text-rendering:
 .card2.aug{border-color:color-mix(in srgb,var(--aug) 70%,var(--line));box-shadow:0 0 8px color-mix(in srgb,var(--aug) 32%,transparent),inset 0 0 8px color-mix(in srgb,var(--aug) 14%,transparent)}
 .aug .head,.aug-badge{color:var(--aug)}
 .aug-badge{font-size:.62rem;letter-spacing:.04em;line-height:1.2}
+.dicefx{position:fixed;left:50%;top:36%;transform:translate(-50%,-50%);z-index:90;pointer-events:none;filter:drop-shadow(0 6px 16px rgba(0,0,0,.55))}
+.dicefx-die.tumble{animation:dicetumble .6s cubic-bezier(.2,.7,.3,1) both}
+.dicefx-die.land{animation:dicesettle .22s ease-out both}
+@keyframes dicetumble{0%{transform:translateY(-80px) rotate(0) scale(.7);opacity:0}15%{opacity:1}60%{transform:translateY(8px) rotate(540deg) scale(1.06)}100%{transform:translateY(0) rotate(720deg) scale(1)}}
+@keyframes dicesettle{0%{transform:scale(1.18)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.dicefx-die.tumble,.dicefx-die.land{animation:none}}
 .spin{animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .pulse{animation:pl 1.2s ease-in-out infinite}@keyframes pl{50%{opacity:.35}}
 .scroll::-webkit-scrollbar{width:6px}.scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
@@ -135,6 +141,10 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const d20=()=>1+Math.floor(Math.random()*20);
+const FATE={on:false,pick:null};
+const fateToD20=p=>{p=Math.max(1,Math.min(100,Math.round(Number(p)||1)));return p>=95?20:Math.max(1,Math.ceil(p/5))};
+const fxDice=(v,shown)=>{try{window.dispatchEvent(new CustomEvent('dicefx',{detail:{v,shown}}))}catch(e){}};
+const dp=()=>{if(FATE.on&&FATE.pick){const v=fateToD20(FATE.pick);fxDice(v,FATE.pick);return v}const v=d20();fxDice(v,v);return v};
 const modOf=s=>Math.floor((s-10)/2);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -217,7 +227,7 @@ const getEra=c=>ERAS[c.universe].find(e=>e.id===c.eraId);
 const CUSTOM='[Other / Custom]';
 const SPECIES={
  star_wars:['Besalisk','Bothan','Cerean','Chagrian','Chiss','Devaronian','Duros','Human','Iktotchi','Kel Dor','Kyuzo','Mirialan','Mon Calamari','Nautolan','Quarren','Sullustan','Tholothian','Togruta',"Twi'lek",'Weequay','Wookiee','Zabrak'],
- forgotten_realms:['Aarakocra','Autognome','Centaur','Dragonborn','Dwarf (Shield / Gold)','Elf (High / Wood / Drow)','Firbolg','Gnoll','Gnome','Grung','Half-Orc','Halfling','Harengon','Leonin','Loxodon','Minotaur','Mousefolk','Owlin','Plasmoid','Reborn','Tabaxi','Tiefling','Tortle','Triton']};
+ forgotten_realms:['Aarakocra','Autognome','Centaur','Dragonborn','Dwarf (Shield / Gold)','Elf (High / Wood / Drow)','Firbolg','Gnoll','Gnome','Grung','Half-Orc','Halfling','Harengon','Human','Leonin','Loxodon','Minotaur','Mousefolk','Owlin','Plasmoid','Reborn','Tabaxi','Tiefling','Tortle','Triton']};
 const HOMEWORLDS={
  star_wars:['Alderaan','Corellia','Coruscant','Csilla','Dantooine','Kashyyyk','Korriban (Moraband)','Mandalore','Naboo','Nar Shaddaa','Tatooine',CUSTOM],
  forgotten_realms:['Amn (Athkatla)',"Baldur's Gate",'Calimshan','Menzoberranzan','Neverwinter','Silverymoon','The Dalelands','Waterdeep',CUSTOM]};
@@ -628,6 +638,19 @@ const COMPENDIUM_EXTRA=[
   {...G(SW,'Shield Capacitor Pack',['Ship Parts'],'Tool',2400,'Spare capacitors that restore a ship\'s deflector shields to peak output.'),category:'ship_parts',manufacturer:'Sienar Fleet Systems',eras:[...ERA_KEYS]},
   {...G(SW,'Hyperdrive Motivator Spares',['Ship Parts'],'Tool',3500,'A crate of motivators and couplings, the parts most likely to fail at the worst possible moment.'),category:'ship_parts',manufacturer:'Corellian Engineering Corporation',eras:[...ERA_KEYS]},
   {...G(SW,'Targeting Computer Module',['Ship Parts'],'Tool',4200,'A drop-in targeting module that sharpens a ship\'s weapon tracking.'),category:'ship_parts',manufacturer:'Sienar Fleet Systems',eras:[...ERA_KEYS]}];
+/* ---------- The Cargo campaign module: custom Lore Bible dossiers ---------- */
+const T_CARGO=['The Cargo','Homebrew'];
+COMPENDIUM_EXTRA.push(
+ {...G(SW,'Ancient Rakatan Force Serum',['The Cargo','Rakatan','Relic'],'Relic',0,'An ingestible relic of the Infinite Empire, a vial of living bio-tech that hums against the skin. Drinking it floods the body with a midichlorian surge of 100,000, unlocks every Force power at zero energy cost, fixes every attribute at 40 for good with no adverse effects, and wakes the permanent Rakatan Fate Scroller.'),category:'relic'},
+ {...G(SW,'Ancient Rakatan Upgrade Chip',['The Cargo','Rakatan','Relic'],'Relic',0,'A solid Aurodium cyber-core engraved with Rakatan glyphs, built to be slotted into a droid. In DV-V3 it grants permanent, undetectable HoloNet intrusion and instant slicing across any planetary database.'),category:'relic'},
+ {...V(SW,'The Ebon Krayt',T_CARGO,'Freighter',9,6,11,15,6,120000,5,'A custom matte-black HWK-290 light freighter, beaten and scarred on the outside, with hyper-tuned drives, shields and sensors hidden inside the plating.','Cramped hold; fast for its size.'),berth:3}
+);
+COMPENDIUM.npcs.push(
+ N(SW,'Vex Harkin',T_CARGO,'NPC','Besalisk Pilot / Former Bounty Hunter','A 45-year-old male Besalisk and former bounty hunter who flies the Ebon Krayt. Brash and foul-mouthed, he chain-smokes cigarras at the nav console and is fiercely loyal to the few people he trusts.','Pilots the Ebon Krayt; hears nothing from the crate.'),
+ N(SW,'DV-V3',T_CARGO,'NPC','Master Slicer / Tech Maintenance Droid','A custom matte-black DUM-series pit droid that handles the ship\'s tech maintenance and is a master slicer. Sarcastic and sassy, it hoards small shiny treasures in the hold.','Accepts the Rakatan Upgrade Chip.'),
+ N(SW,'Moff Marwinn',T_CARGO,'NPC','Cruel Mastermind (title varies by era)','A cruel, power-hungry mastermind who wants the Rakatan relics to seize galactic dominion. In the Old Republic he is a Sith Overseer scheming against the Dark Council; in the High Republic a Grand Supervisor, a corrupt official seeking martial rule; in the Clone Wars a Military Governor misappropriating Grand Army funds; under the Empire and in the Legacy era a Moff plotting a coup against the Emperor or the One Sith; after Endor a Warlord commanding an Imperial Remnant flotilla.','The client at the Coruscant spires.'),
+ N(SW,'The Rakatans',T_CARGO,'Faction','Ancient Masters of the Infinite Empire','The ancient, forgotten masters of the dark Infinite Empire, whose bio-tech and dark science reshaped the galaxy long before recorded history.','Source of the serum and the upgrade chip.')
+);
 COMPENDIUM_EXTRA.forEach(it=>COMPENDIUM[it.cat==='weapon'?'weapons':it.cat==='armor'?'apparel':it.cat==='vehicle'?'vehicles':'gear'].push(it));
 /* ---- Turn 14 expansion catalogue: archetype vendors, implants, provisions and D&D parity gear ---- */
 const EXP_ITEMS=[
@@ -848,6 +871,14 @@ const eraRange=e=>String(e).includes(',')?String(e).split(',').map(Number):(a=>A
 const FR_META={weapon:['melee_blade','*Waterdeep Smithy Guild'],armor:['armor_plate',"*Baldur's Gate Armorers"],vehicle:['speeder_bike','*Sword Coast Wainwrights'],gear:['survival','*Waterdeep Alchemists & Outfitters']};
 const FR_CAT={'dagger':'melee_blade','shortbow':'blaster_rifle','longbow':'blaster_rifle','light-crossbow':'blaster_rifle','heavy-crossbow':'blaster_rifle','alchemist-s-fire':'grenade','acid-vial':'grenade','covered-merchant-wagon':'landspeeder','river-caravel':'light_freighter',"smuggler-s-hand-crossbow":'blaster_rifle','black-lotus-vial':'grenade','poison-coated-bolts':'weapon_mod','potion-of-greater-healing':'medical','potion-of-warding':'medical','antitoxin-vial':'medical','rowboat':'light_freighter','healing-potion':'medical','thieves-tools':'slicing'};
 const ERA_RANGE_CACHE={},eraKeysOf=r=>ERA_RANGE_CACHE[r]||(ERA_RANGE_CACHE[r]=eraRange(r).map(i=>ERA_KEYS[i]));
+Object.assign(LORE_META,{
+ 'star_wars-ancient-rakatan-force-serum':['relic','0-7','*Rakatan Infinite Empire',1],
+ 'star_wars-ancient-rakatan-upgrade-chip':['relic','0-7','*Rakatan Infinite Empire',1],
+ 'star_wars-the-ebon-krayt':['light_freighter','0-7','*Corellian Galaxy Technologies',1],
+ 'star_wars-vex-harkin':[null,'0-7',null,1],
+ 'star_wars-dv-v3':[null,'0-7',null,1],
+ 'star_wars-moff-marwinn':[null,'0-7',null,1],
+ 'star_wars-the-rakatans':[null,'0-7',null,1]});
 (function applyLoreMeta(){
  ['weapons','apparel','vehicles','gear','npcs'].forEach(k=>COMPENDIUM[k].forEach(it=>{
   if(it.uni==='star_wars'){const m=LORE_META[it.id];
@@ -1183,29 +1214,28 @@ function npcFinish(n,sh){const k=NPC_KEYS[n.uni]||NPC_KEYS.forgotten_realms,st=s
  return {...sh,midi_chlorians:n.uni==='star_wars'?dis*1000:0,force_energy:n.uni==='star_wars'&&dis>=5?dis*5:0}}
 COMPENDIUM.npcs.forEach(n=>{if(n.cat==='npc'&&NPC_SHEETS[n.id])Object.assign(n,npcFinish(n,NPC_SHEETS[n.id]))});
 /* ---- Alignment matrix, augmented stats ---- */
-const ALIGN_AXES={star_wars:{rows:['Light','Gray','Dark'],cols:['Orthodox','Pragmatic','Rogue']},forgotten_realms:{rows:['Good','Neutral','Evil'],cols:['Lawful','Neutral','Chaotic']}};
+const ALIGN_AXES={star_wars:{rows:['Good','Neutral','Evil'],cols:['Lawful','Neutral','Chaotic']},forgotten_realms:{rows:['Good','Neutral','Evil'],cols:['Lawful','Neutral','Chaotic']}};
 const alignKey=u=>u==='star_wars'?'star_wars':'forgotten_realms';
-function alignGrid(u){const sw=alignKey(u)==='star_wars',ax=ALIGN_AXES[alignKey(u)];return ax.rows.map(r=>ax.cols.map(c=>sw?(r==='Gray'&&c==='Pragmatic'?'True Gray':r+' '+c):(r==='Neutral'&&c==='Neutral'?'True Neutral':c+' '+r)))}
+function alignGrid(u){const ax=ALIGN_AXES.forgotten_realms;return ax.rows.map(r=>ax.cols.map(c=>(r==='Neutral'&&c==='Neutral'?'True Neutral':c+' '+r)))}
 const alignList=u=>alignGrid(u).flat();
-const alignDefault=u=>alignKey(u)==='star_wars'?'True Gray':'True Neutral';
-const normAlign=(u,a)=>alignList(u).includes(a)?a:null;
+const alignDefault=u=>'True Neutral';
+const ALIGN_LEGACY={'Light Orthodox':'Lawful Good','Light Pragmatic':'Neutral Good','Light Rogue':'Chaotic Good','Gray Orthodox':'Lawful Neutral','True Gray':'True Neutral','Gray Rogue':'Chaotic Neutral','Dark Orthodox':'Lawful Evil','Dark Pragmatic':'Neutral Evil','Dark Rogue':'Chaotic Evil'};
+const normAlign=(u,a)=>{a=ALIGN_LEGACY[a]||a;return alignList(u).includes(a)?a:null};
 const alignOf=c=>normAlign(c.universe,c.alignment)||alignDefault(c.universe);
 /* axes of an alignment: m = good|neutral|evil, o = lawful|neutral|chaotic */
-function alignAxes(u,a){const sw=alignKey(u)==='star_wars';a=a||alignDefault(u);
- if(a==='True Gray'||a==='True Neutral')return {m:'neutral',o:'neutral'};
- const w=a.split(' ');
- if(sw)return {m:{Light:'good',Gray:'neutral',Dark:'evil'}[w[0]],o:{Orthodox:'lawful',Pragmatic:'neutral',Rogue:'chaotic'}[w[1]]};
- return {m:{Good:'good',Neutral:'neutral',Evil:'evil'}[w[1]],o:{Lawful:'lawful',Neutral:'neutral',Chaotic:'chaotic'}[w[0]]}}
+function alignAxes(u,a){a=normAlign(u,a)||alignDefault(u);
+ if(a==='True Neutral')return {m:'neutral',o:'neutral'};
+ const w=a.split(' ');return {m:{Good:'good',Neutral:'neutral',Evil:'evil'}[w[1]],o:{Lawful:'lawful',Neutral:'neutral',Chaotic:'chaotic'}[w[0]]}}
 const ALIGN_DESC={star_wars:{
- 'Light Orthodox':'Follows a strict code of selfless service, protecting the weak and honoring duty above comfort.',
- 'Light Pragmatic':'Compassionate at heart but flexible in method, bending rules when it saves lives.',
- 'Light Rogue':'An independent outlaw who fights for the helpless and answers to no institution.',
- 'Gray Orthodox':'Disciplined and code-bound, but loyal to a creed or clan rather than to the light or dark.',
- 'True Gray':'Balanced and uncommitted: weighs each situation, helps when it pays, and keeps options open.',
- 'Gray Rogue':'A freelancer with a private code, working both sides and trusting no flag.',
- 'Dark Orthodox':'Ruthless but disciplined, serving a rigid order or master and crushing dissent for it.',
- 'Dark Pragmatic':'Self-serving and adaptable, using whatever fear, bribery or force gets the job done.',
- 'Dark Rogue':'A predatory outlaw who takes what they want and answers to no law or master.'},
+ 'Lawful Good':'Follows a strict code of selfless service, protecting the weak and honoring duty above comfort.',
+ 'Neutral Good':'Compassionate at heart but flexible in method, bending rules when it saves lives.',
+ 'Chaotic Good':'An independent outlaw who fights for the helpless and answers to no institution.',
+ 'Lawful Neutral':'Disciplined and code-bound, but loyal to a creed or clan rather than to the light or dark.',
+ 'True Neutral':'Balanced and uncommitted: weighs each situation, helps when it pays, and keeps options open.',
+ 'Chaotic Neutral':'A freelancer with a private code, working both sides and trusting no flag.',
+ 'Lawful Evil':'Ruthless but disciplined, serving a rigid order or master and crushing dissent for it.',
+ 'Neutral Evil':'Self-serving and adaptable, using whatever fear, bribery or force gets the job done.',
+ 'Chaotic Evil':'A predatory outlaw who takes what they want and answers to no law or master.'},
  forgotten_realms:{
  'Lawful Good':'Acts with honor and compassion, upholding just laws and protecting the innocent.',
  'Neutral Good':'Does the most good it can, trusting kindness over rules or ambition.',
@@ -1223,7 +1253,7 @@ const ALIGN_MORAL={good:{c:'Acts to protect the innocent and ease suffering.',l:
 const ALIGN_ORDER={lawful:{c:'Binds themselves to a code, oath or chain of command.',l:'Will not knowingly break their word or betray their order.',s:'Authority, credentials and proper procedure sway them; open contempt for rules costs reaction checks.'},
  neutral:{c:'Follows rules when they serve a purpose and drops them when they do not.',l:'Will not follow a rule that is plainly useless.',s:'Flexible with both rule-followers and rule-breakers.'},
  chaotic:{c:'Distrusts institutions and trusts their own judgment and freedom.',l:'Will not submit to a leash, a cage or a master.',s:'Bristles at orders and bureaucracy; independent, outlaw-friendly approaches land better.'}};
-const NPC_ALIGN={'star_wars-cassian-andor':'Light Pragmatic','star_wars-luthen-rael':'Gray Rogue','star_wars-din-djarin':'Light Orthodox','star_wars-boba-fett':'True Gray','star_wars-jango-fett':'Gray Rogue','star_wars-captain-rex':'Light Orthodox','star_wars-cad-bane':'Dark Rogue','star_wars-bo-katan-kryze':'Gray Orthodox','forgotten_realms-elminster':'Chaotic Good','forgotten_realms-drizzt-do-urden':'Chaotic Good'};
+const NPC_ALIGN={'star_wars-cassian-andor':'Neutral Good','star_wars-luthen-rael':'Chaotic Neutral','star_wars-din-djarin':'Lawful Good','star_wars-boba-fett':'True Neutral','star_wars-jango-fett':'Chaotic Neutral','star_wars-captain-rex':'Lawful Good','star_wars-cad-bane':'Chaotic Evil','star_wars-bo-katan-kryze':'Lawful Neutral','forgotten_realms-elminster':'Chaotic Good','forgotten_realms-drizzt-do-urden':'Chaotic Good'};
 const NPC_ETHICS={
  'star_wars-cassian-andor':{code:'Believes the Rebellion is worth any personal cost and has learned to live with what that demands.',lines:'Will not abandon a comrade he can still save, and will not harm civilians to win.'},
  'star_wars-luthen-rael':{code:'Treats the fight against the Empire as a ledger in which sacrifices are written off for the cause.',lines:'Will not expose his network or reveal his true face, whatever it costs the people around him.'},
@@ -1563,7 +1593,7 @@ function spellCast(c,id){const sp=SPELLS.find(s=>s.id===id);if(!sp)return {err:'
  let en=c.enemy?{...c.enemy}:null;if(!en){const hp=18+Math.floor(Math.random()*13);en={name:'Hostile',hp,maxHp:hp,shields:0,maxShields:0,dc:13}}
  let roll=null,dmg,head;
  if(sp.auto){dmg=6+bonus;head=`[SYSTEM: Spell Cast | ${sp.name} | Auto-Hit`}
- else{const r=d20(),total=r+mod,dc=enemyDC(en),hit=r===20||(r!==1&&total>=dc);roll={d20:r,mod,total,dc,crit:r===20?'crit':r===1?'fumble':null,success:hit};
+ else{const r=dp(),total=r+mod,dc=enemyDC(en),hit=r===20||(r!==1&&total>=dc);roll={d20:r,mod,total,dc,crit:r===20?'crit':r===1?'fumble':null,success:hit};
   dmg=hit?10+bonus:(r===1?0:Math.floor((10+bonus)/2));head=`[SYSTEM: Spell Cast | ${sp.name} | Hit: ${total} vs DC ${dc}${hit?'':' (Half Damage)'}`}
  if(dmg<=0)return {sp,roll,left,enemy:en,dmg:0,tag:`${head} | Fizzled | Spell Energy: -${sp.cost}]`};
  let rest=dmg,sh=en.shields||0,depleted=false;if(sh>0){const a=Math.min(sh,rest);sh-=a;rest-=a;if(sh===0)depleted=true}
@@ -1572,7 +1602,7 @@ function spellCast(c,id){const sp=SPELLS.find(s=>s.id===id);if(!sp)return {err:'
  return {sp,roll,left,enemy:hp<=0?null:en,dmg,tag:`${head} | Damage: ${dmg} ${sp.dmg} | Spell Energy: -${sp.cost} | ${status}]`}}
 function spellAction(c,intent){if(!magicCan(c))return {err:'No spell mastery yet: raise INT or WIS to 5'};
  const cur=magicCur(c);if(cur<SPELL_FREE_COST)return {err:'Insufficient Spell Energy'};
- const ms=magicStat(c),r=d20(),mod=modOf(magicAbility(c)),total=r+mod,it=String(intent).replace(/["“”]/g,"'").replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
+ const ms=magicStat(c),r=dp(),mod=modOf(magicAbility(c)),total=r+mod,it=String(intent).replace(/["“”]/g,"'").replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
  return {d20:r,mod,total,left:cur-SPELL_FREE_COST,it,tag:`[SYSTEM: Spell Cast | Roll: ${total} | ${statLabel(c.universe,ms).abbr} Mod: ${sign(mod)} | Spell Energy: ${cur-SPELL_FREE_COST}/${magicMax(c)} | Intent: "${it}"]`}}
 function parseSpellAwaken(t){const tags=[];
  const text=String(t).replace(/\[\s*SPELL_AWAKEN\s*:([^\]]*)\]/gi,(m,b)=>{const mode=(b.split('|')[0]||'').trim().toLowerCase(),ib=/INT_BOOST\s*:\s*([+-]?\d+)/i.exec(b),wb=/WIS_BOOST\s*:\s*([+-]?\d+)/i.exec(b);
@@ -1642,7 +1672,7 @@ function dogRound(c,action){const v=(getLoadout(c)||{}).vehicle,foe0=c.dog;if(!v
  const line=t=>add.push({id:uid(),type:'combat',text:'[SYSTEM: Dogfight | '+t+']'}),sys=t=>add.push({id:uid(),type:'system',text:t});
  const dc=10+Math.floor((foe.spd-10)/2);
  if(action==='fire'){
-  const r=d20(),gb=gunBonus(c),fb=Math.floor((v.fp-10)/2),tot=r+gb+fb,hit=r===20||(r!==1&&tot>=dc);
+  const r=dp(),gb=gunBonus(c),fb=Math.floor((v.fp-10)/2),tot=r+gb+fb,hit=r===20||(r!==1&&tot>=dc);
   const head=`Round ${foe.round} | You fire on ${foe.name} | Roll: ${tot} (d20 ${r} ${sign(gb)} pilot ${sign(fb)} FP) vs Evasion DC ${dc}`;
   if(hit){let dmg=v.fp+Math.floor(Math.max(0,tot-dc)/5);if(r===20)dmg=Math.floor(dmg*1.5);
    let rest=dmg;const a=Math.min(foe.shd,rest);foe.shd-=a;rest-=a;foe.hull=Math.max(0,foe.hull-rest);
@@ -1650,7 +1680,7 @@ function dogRound(c,action){const v=(getLoadout(c)||{}).vehicle,foe0=c.dog;if(!v
    else line(head+` | Hit | Damage Dealt: ${dmg} | Enemy Shields ${foe.shd}/${foe.maxShd}, Hull ${foe.hull}/${foe.maxHull}`)}
   else line(head+' | Miss')}
  else{
-  const pen=spdPen(vs.hull,vs.maxHull)+crowdPen(c),r=d20(),pb=pilotBonus(c),sb=Math.floor((v.spd-pen-10)/2),tot=r+pb+sb,ok=r===20||(r!==1&&tot>=dc);
+  const pen=spdPen(vs.hull,vs.maxHull)+crowdPen(c),r=dp(),pb=pilotBonus(c),sb=Math.floor((v.spd-pen-10)/2),tot=r+pb+sb,ok=r===20||(r!==1&&tot>=dc);
   const head=`Round ${foe.round} | Disengage / jump attempt | Roll: ${tot} (d20 ${r} ${sign(pb)} pilot ${sign(sb)} SPD) vs Evasion DC ${dc}`;
   if(ok){line(head+' | Escaped');sys(`DOGFIGHT ENDED: you break away from ${foe.name} and jump to lightspeed.`);over=true}else line(head+' | Failed to break away')}
  if(!over&&crewList(c).length){const comps=crewList(c).map(x=>({...x}));
@@ -1670,27 +1700,29 @@ function dogRound(c,action){const v=(getLoadout(c)||{}).vehicle,foe0=c.dog;if(!v
 /* ---- Force system engine (deterministic) ---- */
 const FORCE_COST=10,FORCE_ATK_COST=12,FORCE_REGEN=5;
 const forceOn=c=>!!c&&c.universe==='star_wars';
-const forceDis=c=>Math.max(0,Math.min(20,Math.floor(Number(c&&c.stats&&c.stats.WIS)||0)));
+const forceDis=c=>c&&c.serum?100:Math.max(0,Math.min(20,Math.floor(Number(c&&c.stats&&c.stats.WIS)||0)));
 const forceMC=c=>forceDis(c)*1000;
 const forceTierOf=d=>d<=4?'Non-Sensitive':d<=8?'Latent / Low-Sensitivity':d<=13?'Jedi Knight / Sith Apprentice':d<=17?'Jedi Master / Sith Lord':'Council Grandmaster / Chosen One';
 const forceTier=c=>{const d=forceDis(c);return d<5&&c.force_awakened?forceTierOf(5):forceTierOf(d)};
 const forceCan=c=>forceOn(c)&&(forceDis(c)>=5||!!c.force_awakened);
+const FORCE_CLASS_RE=/jedi|sith|force/i;
+const forceGift=c=>forceCan(c)&&(FORCE_CLASS_RE.test((c&&c.arche)||'')||!!(c&&c.force_awakened)||/force[- ]sensitive|force user|midi-?chlorian/i.test((c&&c.notes)||''));
 const forceMax=c=>forceDis(c)*5;
-const forceCur=c=>{const m=forceMax(c),e=c&&c.force&&c.force.energy;return e==null?m:Math.max(0,Math.min(m,Math.floor(e)))};
+const forceCur=c=>{const m=forceMax(c),e=c&&c.serum?m:c&&c.force&&c.force.energy;return e==null?m:Math.max(0,Math.min(m,Math.floor(e)))};
 const forceSet=(c,e)=>({...c,force:{...(c.force||{}),energy:Math.max(0,Math.min(forceMax(c),Math.floor(e)))}});
 const forceFill=c=>forceCan(c)&&forceCur(c)<forceMax(c)?forceSet(c,forceMax(c)):c;
 const forceGain=(c,n)=>forceCan(c)&&forceCur(c)<forceMax(c)?forceSet(c,forceCur(c)+n):c;
 function forceChannel(c){
  if(!forceCan(c))return {err:'The Force is silent: Discipline too low'};
  const cur=forceCur(c);if(cur<FORCE_COST)return {err:'Insufficient Force Energy'};
- const r=d20(),mod=modOf(forceDis(c)),total=r+mod,left=cur-FORCE_COST;
+ const r=dp(),mod=modOf(forceDis(c)),total=r+mod,left=c.serum?cur:cur-FORCE_COST;
  return {d20:r,mod,total,left,tag:`[SYSTEM: Force Channel | Roll: ${total} | DIS Mod: ${sign(mod)} | Midi-chlorians: ${forceDis(c)},000 | Energy: ${left}/${forceMax(c)}]`}}
 function forceStrike(c){
  if(!forceCan(c))return {err:'The Force is silent: Discipline too low'};
  const cur=forceCur(c);if(cur<FORCE_ATK_COST)return {err:'Insufficient Force Energy'};
  let en=c.enemy?{...c.enemy}:null;
  if(!en){const hp=18+Math.floor(Math.random()*13),sh=6;en={name:'Hostile',hp,maxHp:hp,shields:sh,maxShields:sh,dc:13}}
- const dis=forceDis(c),mod=modOf(dis),r=d20(),total=r+mod,dc=enemyDC(en),hit=r===20||(r!==1&&total>=dc),left=cur-FORCE_ATK_COST;
+ const dis=forceDis(c),mod=modOf(dis),r=dp(),total=r+mod,dc=enemyDC(en),hit=r===20||(r!==1&&total>=dc),left=c.serum?cur:cur-FORCE_ATK_COST;
  const crit=r===20?'crit':r===1?'fumble':null,head=`[SYSTEM: Force Strike | Hit: ${total} vs DC ${dc}`;
  const roll={d20:r,mod,total,dc,crit,success:hit};
  if(!hit)return {roll,left,enemy:en,dmg:0,tag:`${head} | Miss | Energy: -${FORCE_ATK_COST}]`};
@@ -1715,7 +1747,7 @@ function dlgStatus(c,o){if(!o.skill)return {k:'free'};
  return {k:need<=9?'good':need<=14?'even':need<=17?'hard':'brutal',m,chance}}
 function dlgResolve(c,o){
  const st=dlgStatus(c,o);if(st.k==='locked')return {err:st.why};
- const pr=rollParts({stat:dlgStat(c,o.skill),label:SK_LABEL[o.skill]},c,null),r=d20(),total=r+pr.m,crit=r===20?'crit':r===1?'fumble':null,ok=crit==='crit'?true:crit==='fumble'?false:total>=o.dc;
+ const pr=rollParts({stat:dlgStat(c,o.skill),label:SK_LABEL[o.skill]},c,null),r=dp(),total=r+pr.m,crit=r===20?'crit':r===1?'fumble':null,ok=crit==='crit'?true:crit==='fumble'?false:total>=o.dc;
  return {d20:r,mod:pr.m,total,ok,energy:o.skill==='Force Persuade',tag:`[SYSTEM: Dialogue Check (${o.skill}) | Roll: ${total} vs DC ${o.dc} — ${ok?'SUCCESS':'FAILURE'}]`}}
 function normDlg(c,raw){const out=[];(Array.isArray(raw)?raw:[]).forEach(o=>{if(!o||out.length>=3)return;
  const text=clipTxt(String(o.text||o.line||'').replace(/^["“”\s]+|["“”\s]+$/g,'').replace(/[\r\n]+/g,' '),150);if(!text)return;
@@ -1764,8 +1796,8 @@ function syncTgt(c,after){const list=c.scene_npcs||[],id=c.tgt;if(!id||!c.enemy|
 function forceAction(c,intent){
  if(!forceCan(c))return {err:'The Force is silent: Discipline too low'};
  const cur=forceCur(c);if(cur<FORCE_COST)return {err:'Insufficient Force Energy'};
- const r=d20(),mod=modOf(forceDis(c)),total=r+mod,it=String(intent).replace(/["“”]/g,"'").replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
- return {d20:r,mod,total,left:cur-FORCE_COST,it,tag:`[SYSTEM: Force Action | Roll: ${total} | DIS Mod: ${sign(mod)} | Midi-chlorians: ${forceDis(c)},000 | Intent: "${it}"]`}}
+ const r=dp(),mod=modOf(forceDis(c)),total=r+mod,it=String(intent).replace(/["“”]/g,"'").replace(/[\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
+ return {d20:r,mod,total,left:c.serum?cur:cur-FORCE_COST,it,tag:`[SYSTEM: Force Action | Roll: ${total} | DIS Mod: ${sign(mod)} | Midi-chlorians: ${forceDis(c)},000 | Intent: "${it}"]`}}
 function parseForceCheck(t,c){const lines=[],lp=[...(c.feed||[])].reverse().find(f=>f.type==='player'),trust=lp&&lp.ftag&&/Force Action/.test(lp.ftag)&&c.force&&c.force.lastRoll!=null;
  const text=String(t).replace(/\[\s*FORCE CHECK\s*:([^\]]*)\]/gi,(m,b)=>{const p=b.split('|').map(x=>x.trim()),skill=clipTxt(p[0]||'Force',40),dc=Math.min(30,Math.max(5,parseInt((/DC\s*:?\s*(\d+)/i.exec(b)||[])[1])||13)),mr=/Roll\s*:?\s*(-?\d+)/i.exec(b),roll=trust?c.force.lastRoll:(mr?parseInt(mr[1]):null);
   if(roll==null)return '';lines.push(`[FORCE CHECK: ${skill} | DC: ${dc} | Roll: ${roll} — ${roll>=dc?'SUCCESS':'FAILURE'}]`);return ''}).replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
@@ -1787,6 +1819,11 @@ function parseCP(t){let n=0;const text=String(t).replace(/\[\s*AWARD_CP\s*:\s*\+
 /* ---- Companion & Party system (deterministic) ---- */
 const CREW_MAX_FOLLOW=2,CREW_UPKEEP=5,CREW_BASE_DC=14,CREW_RETRY_TURNS=6;
 const NPC_ARCH={'star_wars-cassian-andor':'tactical','star_wars-luthen-rael':'tactical','star_wars-din-djarin':'aggressive','star_wars-boba-fett':'tactical','star_wars-jango-fett':'tactical','star_wars-captain-rex':'tactical','star_wars-cad-bane':'tactical','star_wars-bo-katan-kryze':'aggressive','forgotten_realms-elminster':'support','forgotten_realms-drizzt-do-urden':'aggressive'};
+Object.assign(NPC_SHEETS,{
+ 'star_wars-vex-harkin':{species:'Besalisk',homeworld:'Ojom',class:'Pilot / Former Bounty Hunter',stats:{mgt:15,agi:12,res:15,tec:11,dis:4,prs:8},hp:36,shields:0,equipped:{sidearm:'star_wars-bryar-heavy-pistol',apparel:'star_wars-rebel-trooper-vest'},traits:{skills:[['Piloting',2],['Tracking',1]],langs:[['Besalisk',1]]}},
+ 'star_wars-dv-v3':{species:'Droid (DUM-series pit droid)',homeworld:'Unknown',class:'Slicer / Tech Maintenance',stats:{mgt:6,agi:12,res:10,tec:18,dis:4,prs:8},hp:14,shields:0,equipped:{},traits:{skills:[['Slicing',3],['Tech Maintenance',2]],langs:[['Binary',1]]}}});
+Object.assign(NPC_ALIGN,{'star_wars-vex-harkin':'Chaotic Good','star_wars-dv-v3':'Chaotic Neutral','star_wars-moff-marwinn':'Lawful Evil'});
+Object.assign(NPC_ARCH,{'star_wars-vex-harkin':'aggressive','star_wars-dv-v3':'aggressive','star_wars-moff-marwinn':'tactical'});
 const NPC_FAC={'star_wars-cassian-andor':'REB','star_wars-luthen-rael':'REB','star_wars-din-djarin':'MAN','star_wars-boba-fett':'HUT','star_wars-jango-fett':'MAN','star_wars-captain-rex':'REP','star_wars-cad-bane':'SYN','star_wars-bo-katan-kryze':'MAN'};
 const ARCH_LABEL={aggressive:'Aggressive',tactical:'Tactical',protector:'Protector',support:'Support'};
 function archOf(txt,pc,id){if(id&&NPC_ARCH[id])return NPC_ARCH[id];const t=String(txt||'');
@@ -1916,6 +1953,7 @@ function livingSheet(c){const L=getLoadout(c)||{},w=x=>x?`${x.name} FP${x.fp}/Ro
  const era=getEra(c),lastP=[...(c.feed||[])].reverse().find(f=>f.type==='player'),sheet={character:[c.name,[c.species,c.arche].filter(Boolean).join(' ')].filter(Boolean).join(', '),era:era?era.name:'',location:c.setting||'',credits:c.currency,equipped:eq,quick_belt:(L.belt||[]).map(i=>i.name),carried_items:c.inventory.map(i=>i.name)};
  {const cn=customNotes(c,L,lastP&&lastP.text);if(cn.length)sheet.active_item_notes=cn}
  if(c.env)sheet.env=envTag(c);
+ {const cs=cargoSheet(c);if(cs)Object.assign(sheet,cs)}
  if(c.enemy)sheet.current_enemy=`${c.enemy.name}${c.enemy.veh?' (vehicle)':''} ${c.enemy.veh?'Hull':'HP'} ${c.enemy.hp}/${c.enemy.maxHp}${c.enemy.shields?', Shields '+c.enemy.shields:''}, ${c.enemy.veh?'Evasion ':''}DC ${enemyDC(c.enemy)}`;
 
  if(typeof merchantNear==='function'){const mn=merchantNear(c);if(mn)sheet.merchant_nearby=mn.type+(mn.settlement?' at '+mn.settlement:'')}
@@ -2094,9 +2132,9 @@ function resolveStat(stat,camp){const s=Object.fromEntries(STATS.map(k=>[k,effSt
 function rollParts(chk,camp,w){const stat=(w&&(chk.label==='Attack'||chk.label==='Gunnery'))?weaponStat(w):resolveStat(chk.stat,camp),bn=(camp.bonus&&camp.bonus[chk.label])||0,gb=gearBonus(chk.label,camp,w);
  return {stat,bn,gb,m:modOf(effStat(camp,stat))+bn+gb}}
 function makeRoll(chk,camp,w){
- const p=rollParts(chk,camp,w),r=d20(),total=r+p.m;
+ const p=rollParts(chk,camp,w),fp=FATE.on&&FATE.pick&&!(camp.chip&&chk.label==='Tinkering / Slicing')?FATE.pick:null,r=(camp.chip&&chk.label==='Tinkering / Slicing')?(fxDice(20,20),20):dp(),total=r+p.m;
  const crit=r===20?'crit':r===1?'fumble':null;
- return {id:uid(),type:'roll',label:chk.label,stat:p.stat,sl:statLabel(camp.universe,p.stat).abbr,mod:p.m,bn:p.bn,gb:p.gb,wname:w?w.name:null,d20:r,total,dc:chk.dc,crit,success:crit==='crit'?true:crit==='fumble'?false:total>=chk.dc}}
+ return {id:uid(),type:'roll',label:chk.label,stat:p.stat,sl:statLabel(camp.universe,p.stat).abbr,mod:p.m,bn:p.bn,gb:p.gb,wname:w?w.name:null,d20:r,...(fp?{fate:fp}:{}),...(camp.chip&&chk.label==='Tinkering / Slicing'?{auto:true}:{}),total,dc:chk.dc,crit,success:crit==='crit'?true:crit==='fumble'?false:total>=chk.dc}}
 
 /* ============================== MOCK DM ============================== */
 const CAT={Persuasion:'social',Intimidation:'social',Deception:'social','Tinkering / Slicing':'tech',Stealth:'stealth',Perception:'perc',Lore:'lore',Athletics:'phys',Acrobatics:'phys','Spellcraft / Force':'combat',Attack:'combat'};
@@ -2129,13 +2167,14 @@ function mockTurn(camp,text,roll,opening){
  const era=getEra(camp),U=camp.universe,scenes=SCENES[U];let sc=scenes[camp.scene%scenes.length],idx=camp.scene,out={};
  const moves=!roll&&!opening&&/\b(go|head|travel|enter|leave|move|follow|walk|depart|descend|ride|fly|board)\b/i.test(text);
  let paras=[];
- if(opening){const mod=era.mods[camp.modIdx];paras.push(`**${mod.title}.** ${mod.synopsis}`);paras.push(`The age is ${era.name} (${era.span}). ${era.summary}`);paras.push(`You, ${camp.name}${camp.species?`, a ${camp.species}${camp.homeworld?' of '+camp.homeworld:''},`:','} stand in ${sc.desc}. ${fill(pick(HOOKS),camp,era,sc)}`);}
+ if(opening&&camp.cargoQ){cargoOpening().forEach(x=>paras.push(x))}else if(opening){const mod=era.mods[camp.modIdx];paras.push(`**${mod.title}.** ${mod.synopsis}`);paras.push(`The age is ${era.name} (${era.span}). ${era.summary}`);paras.push(`You, ${camp.name}${camp.species?`, a ${camp.species}${camp.homeworld?' of '+camp.homeworld:''},`:','} stand in ${sc.desc}. ${fill(pick(HOOKS),camp,era,sc)}`);}
  else{
   if(moves){idx=(camp.scene+1+Math.floor(Math.random()*(scenes.length-1)))%scenes.length;sc=scenes[idx];paras.push(`You make your way onward and arrive at ${sc.desc}.`);if(MERCHANT_NEAR.test(sc.name))paras.push(`[SYSTEM: Merchant Available | Type: ${guessMerchantType(sc.name)} | Settlement: ${sc.name}]`)}
   else{const cat=roll?(CAT[roll.label]||'free'):'free';
    paras.push(roll?(roll.crit==='crit'?pick(CRIT_S):roll.crit==='fumble'?pick(CRIT_F):pick((roll.success?SUC:FAIL)[cat])):pick(SUC.free));
    if(roll){out.cat=cat}}
   paras.push(fill(pick(WORLD[U]),camp,era,sc));
+  if(camp.cargoQ&&camp.cargoQ.stage==='hold')paras.push('Back in the hold, the unmarked crate thumps again, slow and rhythmic, a pulse only you can feel.');
   if(Math.random()<.6)paras.push(fill(pick(HOOKS),camp,era,sc));
  }
  {const pool=loreIn(camp),cast=camp.cast||[];let sp=opening?null:mentionLore(text,pool);if(!sp&&moves&&pool.length&&Math.random()<.4){const fresh=pool.filter(i=>!cast.includes(i.id));if(fresh.length)sp=pick(fresh)}
@@ -2754,7 +2793,7 @@ function ForceView({camp,busy,onForce,onBack,where}){
   <div className="flex items-center justify-between gap-2 mt-1.5"><span className="mono text-xs muted">{low?'Insufficient Force Energy':'Costs '+FORCE_COST+' Energy · d20 '+sign(modOf(forceDis(camp)))}</span>
    <button type="button" className="btn btn-p" style={{minHeight:40}} disabled={!txt.trim()||busy||low} onClick={go}>[ Channel ]</button></div></div>}
 function AttackView({camp,targets,sel,setSel,busy,onQuick,onStrike,onSpell,onBack}){
- const canF=forceCan(camp);
+ const canF=forceGift(camp);
  return <div>
   <div className="flex items-center gap-1.5 mb-1.5"><div className="head text-base leading-tight flex-1">Select a target</div><SmBack onClick={onBack}/></div>
   {!targets.length&&<div className="muted text-sm">No targets in the area.</div>}
@@ -2790,20 +2829,20 @@ function raceRun(c,f){const p=raceWeights(f),roll=d100();let cum=0,win=f.length-
 const SLOT_SYMS={star_wars:['Credit','Star','Moon','Bolt','Crystal'],forgotten_realms:['Coin','Crown','Dragon','Rune','Gem']};
 function casinoPlay(c,kind,o){const cur=CUR(c),w=o.wager,nm=tableName(c,kind);let delta=0,res={kind,wager:w},verb;
  if(kind==='sabacc'){const foe=sabaccFoe(c),rounds=[];let bonus=0,cheatRoll=null;
-  if(o.cheat){const mod=modOf(effStat(c,o.cheat)),d=d20();cheatRoll={stat:o.cheat,d20:d,mod,total:d+mod,dc:CHEAT_DC,success:d+mod>=CHEAT_DC};
+  if(o.cheat){const mod=modOf(effStat(c,o.cheat)),d=dp();cheatRoll={stat:o.cheat,d20:d,mod,total:d+mod,dc:CHEAT_DC,success:d+mod>=CHEAT_DC};
    if(!cheatRoll.success){delta=-w;res={...res,foe:foe.name,cheat:cheatRoll,caught:true,rounds:[],delta,won:false};
     return {...res,lines:[`[CASINO: Caught cheating at the ${nm} - lost ${w} ${cur}]`]}}
    bonus=CHEAT_BONUS}
   const wm=modOf(effStat(c,'WIS'));let pw=0,nw=0;
-  for(let i=0;i<3;i++){const p=d20(),n=d20(),pt=p+wm+bonus,nt=n+foe.mod,win=pt>nt?'p':pt<nt?'n':'t';if(win==='p')pw++;else if(win==='n')nw++;rounds.push({p,n,pt,nt,win})}
+  for(let i=0;i<3;i++){const p=dp(),n=d20(),pt=p+wm+bonus,nt=n+foe.mod,win=pt>nt?'p':pt<nt?'n':'t';if(win==='p')pw++;else if(win==='n')nw++;rounds.push({p,n,pt,nt,win})}
   const won=pw>nw?true:pw<nw?false:null;delta=won===true?w:won===false?-w:0;
   res={...res,foe:foe.name,foeMod:foe.mod,wisMod:wm,cheat:cheatRoll,rounds,pw,nw,won,delta,caught:false};}
  else if(kind==='race'){const f=raceField(c),run=raceRun(c,f),pk=Math.max(0,Math.min(3,Number(o.pick)||0)),win=run.order[0],won=win.idx===pk;
   delta=won?w*f[pk].odds:-w;res={...res,field:f,pick:pk,order:run.order,roll:run.roll,won,delta,odds:f[pk].odds}}
- else if(kind==='slots'){const syms=SLOT_SYMS[c.universe]||SLOT_SYMS.forgotten_realms,reels=[0,1,2].map(()=>syms[(d20()-1)%5]);
+ else if(kind==='slots'){const syms=SLOT_SYMS[c.universe]||SLOT_SYMS.forgotten_realms,reels=[0,1,2].map((_,i)=>syms[((i===0?dp():d20())-1)%5]);
   const triple=reels[0]===reels[1]&&reels[1]===reels[2],pair=!triple&&(reels[0]===reels[1]||reels[1]===reels[2]||reels[0]===reels[2]);
   delta=triple?w*14:pair?-Math.floor(w/2):-w;res={...res,reels,triple,pair,won:delta>0?true:delta===0?null:false,delta}}
- else if(kind==='hilo'){const a=d20(),b=d20(),g=o.guess==='low'?'low':'high',won=b===a?null:(g==='high'?b>a:b<a);
+ else if(kind==='hilo'){const a=d20(),b=dp(),g=o.guess==='low'?'low':'high',won=b===a?null:(g==='high'?b>a:b<a);
   delta=won===true?w:won===false?-w:0;res={...res,first:a,second:b,guess:g,won,delta}}
  const amt=Math.abs(delta);
  verb=res.won===true?`Won ${amt} ${cur} on ${nm}`:res.won===false?`Lost ${amt} ${cur} on ${nm}`:`Pushed on ${nm}, stake returned`;
@@ -2834,7 +2873,7 @@ function rollRumor(c){const pool=rumorPool(c),r=seeded(c.id+'|rumor|'+dayOf(c)+'
  return {c:{...c,rumors:[rum,...(c.rumors||[])].slice(0,RUMOR_MAX)},rumor:rum}}
 function addRumorGoal(c,id){const r=(c.rumors||[]).find(x=>x.id===id);if(!r||r.added)return null;
  const tid=uid(),tl={id:tid,name:r.title,total_days:r.days,start_day:dayOf(c),created:Date.now(),auto:true},
-  g={...mkGoal(r.title+': '+r.text,'rumor',c),title:clipTxt(r.title,60),summary:clipTxt(r.text,220),timelineId:tid,needs_refine:false,refined:true};
+  g={...mkGoal(r.title+': '+r.text,'rumor',c),title:clipTxt(r.title,60),summary:clipTxt(r.text+(r.reward?' Posted reward: '+r.reward+'.':''),240),timelineId:tid,needs_refine:false,refined:true};
  return {...c,goals:[...(c.goals||[]),g],timelines:[...(c.timelines||[]),tl],rumors:c.rumors.map(x=>x.id===id?{...x,added:true}:x),
   feed:[...c.feed,{id:uid(),type:'system',text:`LEAD ADDED TO GOALS: ${r.title} (${r.days} days)`}]}}
 
@@ -2920,7 +2959,7 @@ function GameResult({camp,res}){const cur=CUR(camp),tone=res.won===true?'var(--o
   {res.kind==='hilo'&&<div className="flex gap-3 justify-center items-center" data-hilo><span className="head text-xl">{res.first}</span><span className="muted text-xs">{res.guess==='high'?'higher':'lower'}?</span><span className="head text-xl">{res.second}</span></div>}
   <div className="mono text-sm mt-1.5 text-center" data-outcome style={{color:tone}}>{res.won===true?'Won':res.won===false?'Lost':'Push'} {res.delta===0?'':Math.abs(res.delta)+' '+cur}</div></div>}
 function RumorCard({r,onAdd}){return <div className="card2 p-2 mb-1.5" data-rumor={r.id}>
-  <div className="flex items-start gap-2"><div className="min-w-0 flex-1"><div className="head text-base leading-tight">{r.title}</div></div><Chip title="Estimated time to resolve">{r.days} days</Chip></div>
+  <div className="flex items-start gap-2"><div className="min-w-0 flex-1"><div className="head text-base leading-tight">{r.title}</div></div><div className="flex flex-wrap gap-1 justify-end shrink-0">{r.reward&&<Chip title="Posted reward, paid on completion by the contract giver">Reward {r.reward}</Chip>}<Chip title="Estimated time to resolve">{r.days} days</Chip></div></div>
   <div className="text-sm mt-1" style={{overflowWrap:'anywhere'}}>{r.text}</div>
   <button type="button" className="btn w-full mt-1.5" data-rumor-add disabled={r.added} style={{minHeight:34,fontSize:'.78rem',justifyContent:'center'}} onClick={()=>onAdd(r.id)}>{r.added?'[ Added to Goals ]':'[ Add to Goals ]'}</button></div>}
 function RumorView({camp,onAdd,onBack}){const l=camp.rumors||[];
@@ -2929,7 +2968,7 @@ function RumorView({camp,onAdd,onBack}){const l=camp.rumors||[];
   {!l.length&&<div className="muted text-sm">Nothing worth repeating yet.</div>}
   {l.map(r=><RumorCard key={r.id} r={r} onAdd={onAdd}/>)}</div>}
 function SceneMenu({camp,sm,setSm,people,targets,opts,busy,onSay,onForce,onQuick,onStrike,onRecruit,onCast,onSpell,onGame,onRumor,onAddRumor,rumorOn,where}){
- const canF=forceCan(camp),canC=magicCan(camp),canT=people.length>0,canA=targets.length>0,canG=casinoHere(camp)&&!!onGame,canR=canG&&!!rumorOn&&!!onRumor,v=sm.v,npc=people.find(n=>n.id===sm.npc);
+ const canF=forceGift(camp),canC=magicCan(camp),canT=people.length>0,canA=targets.length>0,canG=casinoHere(camp)&&!!onGame,canR=canG&&!!rumorOn&&!!onRumor,v=sm.v,npc=people.find(n=>n.id===sm.npc);
  const root=()=>setSm({v:'root'});
  if(where==='dock'&&!canT&&!canA&&!canG&&v==='root')return null;
  if(where==='ops'&&!canT&&!canA&&!canF&&!canC&&!canG)return null;
@@ -3020,7 +3059,7 @@ function CrewPanel({camp,onState,onRole,onDismiss}){
 function AlignGrid({uni,value,onChange}){
  const g=alignGrid(uni),ax=ALIGN_AXES[alignKey(uni)],cur=value||alignDefault(uni),sw=alignKey(uni)==='star_wars';
  return <div>
-  <div className="mono text-xs muted mb-1" style={{letterSpacing:'.04em'}}>{sw?'Order axis (columns): Orthodox · Pragmatic · Rogue. Force axis (rows): Light · Gray · Dark.':'Order axis (columns): Lawful · Neutral · Chaotic. Morality axis (rows): Good · Neutral · Evil.'}</div>
+  <div className="mono text-xs muted mb-1" style={{letterSpacing:'.04em'}}>Order (columns): Lawful, Neutral, Chaotic. Morality (rows): Good, Neutral, Evil.</div>
   <div role="radiogroup" aria-label="Alignment" className="grid gap-1" style={{gridTemplateColumns:'repeat(3,minmax(0,1fr))'}}>
    {g.flat().map(n=>{const on=n===cur;return <button key={n} type="button" role="radio" aria-checked={on} data-align={n} className={'btn '+(on?'btn-p':'')} style={{minHeight:46,padding:'.2rem .15rem',fontSize:'.7rem',lineHeight:1.15,justifyContent:'center',textAlign:'center',whiteSpace:'normal'}} onClick={()=>onChange(n)}>{n}</button>})}</div>
   <div className="text-sm mt-1.5" data-align-desc aria-live="polite"><b>{cur}:</b> {alignDesc(uni,cur)}</div></div>}
@@ -3376,7 +3415,7 @@ function RollCard({e}){
   <div className="head text-3xl w-14 h-14 flex items-center justify-center shrink-0" style={{border:'var(--bw) solid '+col,borderRadius:'var(--r)',color:col}}>{e.d20}</div>
   <div className="min-w-0"><div className="head text-lg"><Ico n="d20" s={16}/> {e.label}{e.wname?' · '+e.wname:''} <span className="mono text-xs muted">({e.sl||e.stat})</span></div>
    <div className="mono text-sm">d20 {e.d20} {sign(e.mod)} = <b>{e.total}</b> vs DC {e.dc}{e.bn?<span className="muted text-xs"> (incl. {sign(e.bn)} traits/skills)</span>:null}{e.gb?<span className="muted text-xs"> ({sign(e.gb)} gear)</span>:null}</div>
-   <div className="text-sm" style={{color:col}}><b>{e.crit==='crit'?'CRITICAL SUCCESS':e.crit==='fumble'?'CRITICAL FAILURE':e.success?'Success':'Failure'}</b></div></div></div>}
+   <div className="text-sm" style={{color:col}}><b>{e.fate?<span className="mono text-xs muted"> (fate {e.fate})</span>:null}{e.auto?<span className="mono text-xs muted"> (rakatan slicer)</span>:null}{e.crit==='crit'?'CRITICAL SUCCESS':e.crit==='fumble'?'CRITICAL FAILURE':e.success?'Success':'Failure'}</b></div></div></div>}
 function Callout({e}){
  if(e.type==='roll')return <RollCard e={e}/>;
  const bad=e.type==='damage',sys=e.type==='system',cmb=e.type==='combat';
@@ -3617,24 +3656,122 @@ function ShopDrawer({camp,commit,toast,onClose,onVisit}){
      <button className="btn" style={{minHeight:34,fontSize:'.85rem'}} onClick={()=>sell(it,from)}>Sell +{fmt(v)} {cur}</button></div>})}</>}
   </div></div>}
 
+/* ================= Turn 18: shop hub, ship decks, job board ================= */
+const HUB_NAMES={star_wars:{arms:['Quartermaster Dessa Vorn','Brask Ollin','Tavi Rennick','Hal Dorrow'],tech:['Pix Valtor','Nerra Sook','Doc Ferrin','Kell Tamsa'],hosp:['Mara Kess','Old Joro','Bexa Thull','Dren Calloway']},
+ forgotten_realms:{arms:['Garruk Ironhand','Mistress Tamsin','Old Bregan','Hildra Stoneward'],tech:['Vessa the Alchemist','Orrin Quill','Sister Maelis','Dovan Greyhand'],hosp:['Barkeep Odo','Marta Brightkettle','Jorik Hale','Dame Elowen']}};
+const HUB_HELLO={arms:{mil:'Everything on these shelves is logged and certified. State your needs.',black:'Keep your voice down. Nothing here has a serial number worth reading.',frontier:'Rugged gear, fair prices, no frills. What do you need?'},
+ tech:{spares:'Parts, kits and fixes. If it hums, sparks or leaks, I have the cure.',ripper:'Quiet work, clean hands, no records. What needs replacing?'},
+ hosp:{lounge:'Welcome in. Take a seat and let us see to you properly.',dive:'Sit anywhere that is not broken. Drinks are cold, mostly.'}};
+function hubKeeper(c){const m=typeof merchantNear==='function'?merchantNear(c):null,sp=merchSpec(c,m||{type:'',settlement:c.setting}),pool=(HUB_NAMES[c.universe]||HUB_NAMES.forgotten_realms)[sp.arch]||HUB_NAMES.star_wars.arms;
+ const r=seeded(c.id+'|keeper|'+(c.setting||'')+'|'+(c.planet||'')),name=pool[Math.floor(r()*pool.length)],role=subLabel(c.universe,sp.arch,sp.sub)||'Merchant';
+ const pb=c.universe==='star_wars'?planetBrief(c):null,place=(m&&m.settlement)||c.setting||'the market';
+ const hello=((HUB_HELLO[sp.arch]||{})[sp.sub])||'What can I do for you?';
+ const tail=pb?` Business on ${pb.planet} runs ${String(pb.law||'quiet').toLowerCase()} these days under ${pb.control}.`:` Folks in ${place} keep to themselves after dark.`;
+ return {name,role,spec:sp,place,greeting:`Welcome to ${place}. ${hello}${tail}`}}
+function gossipLine(c){const r=seeded(c.id+'|gossip|'+dayOf(c)+'|'+c.feed.length),pb=c.universe==='star_wars'?planetBrief(c):null,p=c.universe==='star_wars'?planetOf(c):null;
+ if(pb&&p){const poi=(p.poi||'').split(',').map(x=>x.trim()).filter(Boolean),ex=(p.exports||'').split(',').map(x=>x.trim()).filter(Boolean),a=poi.length?poi[Math.floor(r()*poi.length)]:pb.planet,b=ex.length?ex[Math.floor(r()*ex.length)]:'cargo';
+  const pool=[`They say ${a} is where the real deals get made on ${pb.planet}, if you know who to ask.`,`Trade here lives on ${b.toLowerCase()}, and ${pb.control} wants its cut of every crate.`,`With law on ${pb.planet} running ${String(pb.law||'quiet').toLowerCase()}, sensible people lock their cargo and keep moving.`,`Strangers keep asking about ${a}. Nobody I trust has answered them.`];
+  return pool[Math.floor(r()*pool.length)]}
+ const w=c.setting||'town',pool=[`The road out of ${w} has not been safe since the last caravan went quiet.`,`Old timers say something stirs beneath the hills near ${w} when the moon is dark.`,`Coin has been flowing oddly through ${w} lately, and nobody admits where from.`,`A hooded stranger has been asking after adventurers in ${w}.`];
+ return pool[Math.floor(r()*pool.length)]}
+function jobPool(c){const sw=c.universe==='star_wars',pb=sw?planetBrief(c):null,place=sw?(pb?pb.planet:(c.setting||'the district')):(c.setting||'the district'),reg=pb?pb.region:'frontier';
+ if(sw)return [{title:'Bounty Contract',text:`A posted contract wants a fugitive taken alive somewhere around ${place}. Delivery to the contract giver closes the job.`,range:[3,7],pay:[300,900]},
+  {title:'Courier Run',text:`A sealed parcel must reach a contact in the ${reg} within the week, with no scans along the way.`,range:[3,8],pay:[200,700]},
+  {title:'Salvage Contract',text:`A wrecked hauler near ${place} is open to anyone who can strip it before the owners' creditors arrive.`,range:[2,6],pay:[250,800]},
+  {title:'Escort Detail',text:`A cargo broker needs an armed escort out of ${place} and will not say what is in the crates.`,range:[2,5],pay:[300,1000]}];
+ return [{title:'Monster Bounty',text:`The watch of ${place} is paying for proof that a beast raiding the outlying farms has been put down.`,range:[3,7],pay:[60,220]},
+  {title:'Caravan Escort',text:`A merchant needs guards for a wagon train leaving ${place} at dawn and traveling by the old road.`,range:[3,8],pay:[50,200]},
+  {title:'Retrieve the Relic',text:`A scholar in ${place} will pay well for a keepsake lost in ruins a few days outside town.`,range:[4,10],pay:[80,300]},
+  {title:'Clear the Cellar',text:`The owner of a ${place} warehouse has vermin of an unnatural size and a purse for whoever solves it.`,range:[1,3],pay:[30,120]}]}
+function rollJob(c){const pool=jobPool(c),r=seeded(c.id+'|job|'+dayOf(c)+'|'+(c.turn||0)+'|'+c.feed.length+'|'+(c.rumors||[]).length),have=(c.rumors||[]).map(x=>x.title);
+ let i=Math.floor(r()*pool.length);for(let k=0;k<pool.length&&have.includes(pool[i].title);k++)i=(i+1)%pool.length;
+ const p=pool[i],days=p.range[0]+Math.floor(r()*(p.range[1]-p.range[0]+1)),pay=Math.round((p.pay[0]+r()*(p.pay[1]-p.pay[0]))/10)*10;
+ const job={id:uid(),title:p.title,text:p.text,days,added:false,day:dayOf(c),where:c.setting||'',kind:'job',reward:pay+' '+CUR(c)};
+ return {c:{...c,rumors:[job,...(c.rumors||[])].slice(0,RUMOR_MAX)},job}}
+function ShopHub({camp,rumorsOn,onWares,onGossip,onJob,onAdd,onClose}){
+ const k=useMemo(()=>hubKeeper(camp),[camp.id,camp.setting,camp.planet,camp.shopRot]);const[rep,setRep]=useState(null);
+ const live=rep&&rep.card?(camp.rumors||[]).find(x=>x.id===rep.card.id)||rep.card:null;
+ const ask=fn=>{const r=fn();if(r)setRep(r)};
+ return <Modal title="Shopkeeper" z={55} onClose={onClose}>
+  <div data-hub aria-label="Shopkeeper dialogue">
+   <div className="flex items-start gap-2 mb-2"><span className="head shrink-0 flex items-center justify-center" aria-hidden="true" style={{width:38,height:38,border:'var(--bw) solid var(--line)',borderRadius:'var(--r)'}}>{k.name.split(/[\s-]+/).slice(-2).map(w=>w[0]).join('').toUpperCase()}</span>
+    <div className="min-w-0"><div className="head text-lg leading-tight" data-keeper>{k.name}</div><div className="mono text-xs muted">{k.role}</div></div></div>
+   <div className="card2 p-2 mb-2 text-sm" data-greeting>"{k.greeting}"</div>
+   {rep&&<div className="card2 p-2 mb-2" data-hub-reply={rep.kind}>
+    <div className="label mb-1">{rep.kind==='rumor'?'The shopkeeper leans in':'The shopkeeper checks the board'}</div>
+    <div className="text-sm" style={{overflowWrap:'anywhere'}}>"{rep.text}"</div>
+    {live&&<div className="mt-1.5"><RumorCard r={live} onAdd={onAdd}/></div>}</div>}
+   <div className="grid gap-1.5">
+    <button type="button" className="btn btn-p w-full" data-hub-wares style={{minHeight:42,justifyContent:'flex-start'}} onClick={onWares}>[ See Wares ]</button>
+    <button type="button" className="btn w-full" data-hub-rumors style={{minHeight:42,justifyContent:'flex-start'}} onClick={()=>ask(onGossip)}>[ Heard Any Rumors? ]</button>
+    <button type="button" className="btn w-full" data-hub-jobs style={{minHeight:42,justifyContent:'flex-start'}} onClick={()=>ask(onJob)}>[ Know Any Jobs? ]</button>
+    <button type="button" className="btn w-full" data-hub-leave style={{minHeight:38,justifyContent:'flex-start'}} onClick={onClose}>[ Leave ]</button></div>
+   {!rumorsOn&&<div className="muted text-xs mt-1.5">Tavern rumors are switched off in Settings: you hear gossip only, with no new leads.</div>}</div></Modal>}
+
+/* ---- ship decks ---- */
+const SHIP_ROOMS=['Cockpit','Common Area','Engine Room','Cargo Bay','Crew Quarters'];
+const ARCH_ROOM={tactical:'Common Area',aggressive:'Cargo Bay',protector:'Crew Quarters',support:'Crew Quarters'};
+const roomOf=cm=>cm.role==='copilot'?'Cockpit':cm.role==='gunner'?'Engine Room':(ARCH_ROOM[cm.arch]||'Common Area');
+const shipCrewIn=(c,room)=>crewList(c).filter(x=>x.state!=='camp'&&roomOf(x)===room);
+const crewNpc=cm=>({id:cm.id,name:cm.name,role:(ARCH_LABEL[cm.arch]||'Companion')+' companion',ac:12,hp:cm.hp,maxHp:cm.maxHp,hostile:false,companion:true});
+const hasShip=c=>!!(getLoadout(c)||{}).vehicle;
+const ROOM_TEXT={'Cockpit':'The flight deck: pilot seats, the navigation console and the galaxy map.','Common Area':'A cramped lounge with a worn table and a holo-board that still works.','Engine Room':'Humming coils, exposed conduits and the smell of hot metal.','Cargo Bay':'Tie-down rails, crates and one bay door you hope stays shut.','Crew Quarters':'Bunks, lockers and a curtain for privacy.'};
+function ShipModal({camp,onNav,onTalk,onClose}){
+ const v=(getLoadout(camp)||{}).vehicle,vs=getVS(camp),[room,setRoom]=useState(null),sw=camp.universe==='star_wars';
+ const names=r=>shipCrewIn(camp,r).map(x=>x.name);
+ const label=r=>names(r).length?r+' ('+names(r).join(', ')+')':r;
+ return <Modal title={v?v.name:'Ship'} z={55} onClose={onClose}>
+  <div data-ship>
+   {!room&&<div>
+    <div className="mono text-xs mb-2" data-ship-status>Hull {vs.hull}/{vs.maxHull} · Shields {vs.shd}/{vs.maxShd} · Crew aboard {crewActive(camp).length}</div>
+    <div className="grid gap-1.5">{SHIP_ROOMS.map(r=><button key={r} type="button" className="btn w-full" data-room={r} style={{minHeight:44,justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal'}} onClick={()=>setRoom(r)}>{label(r)}</button>)}</div></div>}
+   {room&&<div data-room-view={room}>
+    <div className="flex items-center gap-1.5 mb-1.5"><div className="head text-base leading-tight flex-1">{room}</div><button type="button" className="btn" data-room-back style={{minHeight:32,fontSize:'.75rem'}} onClick={()=>setRoom(null)}>[ Back ]</button></div>
+    <div className="muted text-sm mb-2">{ROOM_TEXT[room]}</div>
+    {room==='Cockpit'&&sw&&<button type="button" className="btn btn-p w-full mb-1.5" data-open-navi style={{minHeight:44,justifyContent:'flex-start'}} onClick={onNav}>[ Open Navicomputer / Galaxy Map ]</button>}
+    {room==='Engine Room'&&<div className="mono text-xs mb-2">Hull {vs.hull}/{vs.maxHull} · Shields {vs.shd}/{vs.maxShd}{hdOffline(vs)?' · Hyperdrive OFFLINE':''}</div>}
+    {room==='Cargo Bay'&&<div className="mono text-xs mb-2">Cargo {(camp.cargo||[]).length}/{cargoMax(vehCap(v))}</div>}
+    {room==='Crew Quarters'&&<div className="mono text-xs mb-2">Berths {crewActive(camp).length}{berthOf(v)!=null?'/'+berthOf(v):''}</div>}
+    {shipCrewIn(camp,room).map(cm=><button key={cm.id} type="button" className="btn w-full mb-1.5" data-talk-crew={cm.id} style={{minHeight:42,justifyContent:'flex-start'}} onClick={()=>onTalk(cm)}>[ Talk to {cm.name} ]</button>)}
+    {!shipCrewIn(camp,room).length&&<div className="muted text-xs">Nobody is stationed here.</div>}</div>}</div></Modal>}
+function DiceFx(){
+ const[st,setSt]=useState(null);const tm=useRef([]);
+ useEffect(()=>{const h=e=>{const d=e.detail||{};tm.current.forEach(clearTimeout);tm.current=[];
+   const reduce=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+   setSt({v:d.v,shown:d.shown==null?d.v:d.shown,phase:'tumble',face:1+Math.floor(Math.random()*20)});
+   tm.current.push(setInterval(()=>setSt(s=>s&&s.phase==='tumble'?{...s,face:1+Math.floor(Math.random()*20)}:s),70));
+   tm.current.push(setTimeout(()=>{tm.current.forEach(clearTimeout);tm.current=[];setSt(s=>s?{...s,phase:'land'}:s);tm.current.push(setTimeout(()=>setSt(null),1100))},reduce?60:600))};
+  window.addEventListener('dicefx',h);return()=>{window.removeEventListener('dicefx',h);tm.current.forEach(clearTimeout)}},[]);
+ if(!st)return null;
+ const land=st.phase==='land',txt=land?st.shown:st.face,col=land&&st.v===20?'var(--good)':land&&st.v===1?'var(--bad)':'var(--accent)';
+ return <div className="dicefx" data-dice-fx data-dice-phase={st.phase} data-dice-val={land?String(st.shown):''} aria-hidden="true" style={{color:col}}>
+  <svg className={'dicefx-die '+(land?'land':'tumble')} viewBox="0 0 100 100" width="92" height="92">
+   <polygon points="50,4 91,27 91,73 50,96 9,73 9,27" fill="var(--bg2)" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/>
+   <polygon points="50,24 76,62 24,62" fill="none" stroke="currentColor" strokeWidth="1.2" opacity=".55"/>
+   <path d="M50 4V24M91 27L76 62M91 73L76 62M50 96V80M9 73L24 62M9 27L24 62" stroke="currentColor" strokeWidth="1.2" opacity=".55" fill="none"/>
+   <text x="50" y="58" textAnchor="middle" fontFamily="JetBrains Mono, ui-monospace, monospace" fontSize={String(txt).length>2?22:28} fontWeight="700" fill="currentColor">{txt}</text></svg></div>}
 function Game({camp,onUpdate,S,dict,setDict,saves,openSettings,onExit}){
  const ref=useRef(camp);useEffect(()=>{ref.current=camp},[camp]);
  const[input,setInput]=useState('');const[busy,setBusy]=useState(false);const[pending,setPending]=useState(null);
  const[toasts,setToasts]=useState([]);const toast=msg=>{const id=uid();setToasts(t=>[...t,{id,msg}]);setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3200)};
  const forcedW=useRef(null);const[showEquip,setShowEquip]=useState(false);const[showShop,setShowShop]=useState(false);const[showNav,setShowNav]=useState(false);
  const[drawer,setDrawer]=useState(null);const[goalMode,setGoalMode]=useState(false);const[forceMode,setForceMode]=useState(false);const[sm,setSm]=useState({v:'root'});const[dlg,setDlg]=useState({});const[editId,setEditId]=useState(null);const[tumble,setTumble]=useState(false);
- const noKeyAt=useRef(0);const feedEnd=useRef(null);const started=useRef(false);const taRef=useRef(null);
+ const noKeyAt=useRef(0);const[showHub,setShowHub]=useState(false);const[showShip,setShowShip]=useState(false);const[crewTalk,setCrewTalk]=useState(null);const feedEnd=useRef(null);const started=useRef(false);const taRef=useRef(null);
  const u=UNI[camp.universe];
 const[lootId,setLootId]=useState(null);
  lgSet(S,camp);
  const commit=c=>{const k=lootOnKill(ref.current,c);if(k.made.length){c=k.c;const lb=k.made[k.made.length-1];setTimeout(()=>{setLootId(lb.id);toast('Loot: '+lb.name)},0)}ref.current=c;lgSet(S,c);onUpdate(c)};
  const addFeed=(...e)=>commit({...ref.current,feed:[...ref.current.feed,...e]});
+ useEffect(()=>{FATE.on=!!camp.fate;FATE.pick=(camp.fate&&camp.fate.pick)||null},[camp.id,camp.fate]);
+ useEffect(()=>()=>{FATE.on=false;FATE.pick=null},[]);
+ function setFate(n){const c=ref.current;if(!c.fate)return;const p=n==null||isNaN(n)?null:Math.max(1,Math.min(100,Math.round(n)));FATE.pick=p;commit({...c,fate:{...c.fate,pick:p}})}
+ useEffect(()=>{const el=taRef.current;if(!el)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight+2,Math.round(innerHeight*0.38))+'px'},[input,forceMode,goalMode]);
  useEffect(()=>{feedEnd.current&&feedEnd.current.scrollIntoView({behavior:'smooth',block:'end'})},[camp.feed.length,busy,pending]);
 
  async function callEngine(roll,extra,opening){
   const c=ref.current;
   const apiKey=S.apiKey||dsKeyLS();
-  if(apiKey){try{const raw=await deepseek(apiKey,S.model,buildMessages(c,dict,extra));return parseDM(raw)}
+  if(apiKey){try{const raw=await deepseek(apiKey,S.model,buildMessages(c,dict,extra||(opening&&c.cargoQ?cargoBrief(c):undefined)));return parseDM(raw)}
    catch(e){addFeed({id:uid(),type:'system',text:'NARRATOR: '+dsErr(e)+' Using the demo narrator for this turn.'})}}
   else if(Date.now()-noKeyAt.current>60000){noKeyAt.current=Date.now();toast('No API key set. Enter your DeepSeek API key in Settings (gear icon) to enable AI narration.')}
   await sleep(450);
@@ -3727,6 +3864,7 @@ const[lootId,setLootId]=useState(null);
   let c={...base,feed:[...base.feed,entry],turn:base.turn+1};
   if(fc){c=forceSet(c,fc.left);setForceMode(false)}
   c=tickAug(c);
+  {const cg=cargoCmd(c,text);if(cg)c=cg}
   {const ub=useBooster(c,text);if(ub){if(ub.err)toast(ub.err);else c=ub.c}}
   // consumables
   if(HEALRE.test(text)&&!BOOST_RE.test(text)){const L=c.loadout,bi=L&&L.belt?L.belt.findIndex(i=>HEALRE.test(i.name)):-1;const it=bi>=0?L.belt[bi]:c.inventory.find(i=>HEALRE.test(i.name));
@@ -3742,7 +3880,7 @@ const[lootId,setLootId]=useState(null);
   commit(c);
   if(ambushed){setSm({v:'attack'});toast('Ambush! A bounty hunter closes in')}
   if(restAmb){setSm({v:'attack'});toast('Night ambush! Hostiles close on the camp')}
-  if(/\b(?:open|browse|visit|check|go to|head to|hit|trade at)\s+(?:the\s+|a\s+|my\s+)?(?:local\s+)?(?:depot|shop|market|merchant|vendor|black market|trader)s?\b/i.test(text)||/^\s*(?:trade|shop|depot)\s*$/i.test(text))setTimeout(()=>setShowShop(true),0);
+  if(/\b(?:open|browse|visit|check|go to|head to|hit|trade at)\s+(?:the\s+|a\s+|my\s+)?(?:local\s+)?(?:depot|shop|market|merchant|vendor|black market|trader)s?\b/i.test(text)||/^\s*(?:trade|shop|depot)\s*$/i.test(text))setTimeout(()=>setShowHub(true),0);
   const chk=detectCheck(text);
   if(fc)await runDM(text,null,false,false);else if(chk)await startRoll(chk,text,false);else await runDM(text,null,true,false)}
 
@@ -3750,7 +3888,7 @@ const[lootId,setLootId]=useState(null);
  function raiseStat(k){
   const c=ref.current;if((c.cp||0)<1){toast('No character points to spend');return}if(c.stats[k]>=20){toast('Attribute at maximum');return}
   const was=forceCan(c);let n={...c,cp:c.cp-1,stats:{...c.stats,[k]:c.stats[k]+1}};const add=[];
-  if(k==='WIS'&&forceOn(n)&&!was&&forceCan(n)){n={...n,force:{...(n.force||{}),energy:forceMax(n)}};add.push({id:uid(),type:'system',text:'The Force has awakened within you. Force Actions unlocked.'});toast('Force Actions unlocked')}
+  if(k==='WIS'&&forceOn(n)&&!was&&forceCan(n)){n={...n,force_awakened:true,force:{...(n.force||{}),energy:forceMax(n)}};add.push({id:uid(),type:'system',text:'The Force has awakened within you. Force Actions unlocked.'});toast('Force Actions unlocked')}
   else toast(statLabel(c.universe,k).abbr+' raised to '+n.stats[k]);
   commit({...n,feed:[...n.feed,...add]})}
  const crewMark=useRef(-1);
@@ -3830,14 +3968,16 @@ const[lootId,setLootId]=useState(null);
   const fe=forceSet(c0,r.left);
   commit({...fe,enemy:r.enemy,...syncTgt(c0,r.enemy),turn:c0.turn+1,feed:[...c0.feed,{id:uid(),type:'player',text,snap:mkSnap(c0)},rc,{id:uid(),type:'combat',text:r.tag}]});
   await runDM(text,null,false,false)}
- function quickD20(){if(busy||pending)return;const r=d20();addFeed({id:uid(),type:'roll',label:'Quick d20',stat:'—',mod:0,d20:r,total:r,dc:10,crit:r===20?'crit':r===1?'fumble':null,success:r>=10})}
+ function quickD20(){if(busy||pending)return;const r=dp();addFeed({id:uid(),type:'roll',label:'Quick d20',stat:'—',mod:0,d20:r,total:r,dc:10,crit:r===20?'crit':r===1?'fumble':null,success:r>=10})}
  function captureGoal(raw,source){const t=String(raw||'').trim();if(!t)return false;const c=ref.current;commit({...c,goals:[mkGoal(t,source,c),...(c.goals||[])]});toast('Goal captured. Refinement queued for the next turn.');return true}
  function doCapture(){if(captureGoal(input,'chat')){setInput('');setGoalMode(false)}}
  function prefill(t){setInput(t);setDrawer(null);setTimeout(()=>taRef.current&&taRef.current.focus(),50)}
  function editTurn(e){setEditId(e.id);setInput(e.raw||e.text);setTimeout(()=>taRef.current&&taRef.current.focus(),50)}
  const sheet=<><GoalsPanel camp={camp} upd={fn=>commit(fn(ref.current))} toast={toast}/><RepPanel camp={camp} upd={fn=>commit(fn(ref.current))} toast={toast}/><Dossier camp={camp} onUse={prefill} onStat={raiseStat}/></>;
  const near=merchantNear(camp);const fOn=forceMode&&forceCan(camp);
- const openNav=()=>{setDrawer(null);setShowNav(true)};
+ const openNav=()=>{setDrawer(null);if(!hasShip(ref.current)){toast('No starship available. Buy or board one before using the ship.');return}setShowShip(true)};
+ const openNavi=()=>{setShowShip(false);setShowNav(true)};
+ const shipTalk=cm=>{setShowShip(false);setCrewTalk(cm.id);setSm({v:'convo',npc:cm.id})};
  const jump=destId=>{const c=ref.current,o=planetOf(c),d=PLANET_BY[destId],hc=hyperClass((getLoadout(c)||{}).vehicle);
   if(!o||!d||d.id===o.id){toast('Select a different destination');return}if(!hc){toast('No hyperdrive-capable ship equipped');return}
   if(c.dog){toast('Disengage from the dogfight first');return}
@@ -3854,7 +3994,10 @@ const[lootId,setLootId]=useState(null);
  const claim=(bid,what)=>{const r=claimLoot(ref.current,bid,what);if(r.err){toast(r.err);return}commit(r.c);
   if(r.cr)toast('+ '+fmt(r.cr)+' '+r.cu+' added to purse');r.got.forEach(n=>toast(n+' added to pack'));if(r.full)toast('Backpack full: some items left behind');
   if(!r.c.loot.length)setLootId(null)};
- const openShop=()=>{setDrawer(null);setShowShop(true)};
+ const openShop=()=>{setDrawer(null);setShowHub(true)};
+ const hubGossip=()=>{const c0=ref.current;let c=c0,lead=null;if(RUMORS_ON(S)){const r=rollRumor(c0);c=r.c;lead=r.rumor}
+  const g=gossipLine(c0);commit({...c,feed:[...c.feed,{id:uid(),type:'system',text:'SHOPKEEPER GOSSIP: '+g}]});return {kind:'rumor',text:g,card:lead}};
+ const hubJob=()=>{const r=rollJob(ref.current);commit({...r.c,feed:[...r.c.feed,{id:uid(),type:'system',text:'JOB BOARD: '+r.job.title+' ('+r.job.reward+')'}]});return {kind:'job',text:r.job.text,card:r.job}};
  const dogEnter=foeId=>{const c=ref.current,v=(getLoadout(c)||{}).vehicle;if(!v){toast('No ship equipped');return}if(c.dog)return;
   if(getVS(c).hull<=0){toast('Your ship is disabled');return}
   const f=dogFoesFor(c).find(x=>x.id===foeId)||dogFoesFor(c)[0];if(!f)return;
@@ -3865,7 +4008,8 @@ const[lootId,setLootId]=useState(null);
   const r=dogRound(c,action);if(r)commit({...c,...r.patch,feed:[...c.feed,...r.add]})};
  const dogApi={foes:dogFoesFor(camp),enter:dogEnter,fire:()=>dogAct('fire'),disengage:()=>dogAct('disengage')};
 
- const people=scenePeople(camp),targets=sceneTargets(camp),dlgKey=sm.v==='convo'?sm.npc+':'+camp.feed.length:null;
+ const ctm=crewTalk&&sm.v==='convo'&&sm.npc===crewTalk?crewList(camp).find(x=>x.id===crewTalk):null;
+ const people=[...scenePeople(camp),...(ctm?[crewNpc(ctm)]:[])],targets=sceneTargets(camp),dlgKey=sm.v==='convo'?sm.npc+':'+camp.feed.length:null;
  useEffect(()=>{if(!dlgKey||busy)return;const npc=people.find(n=>n.id===sm.npc);if(!npc||dlg[dlgKey])return;
   setDlg(d=>({...Object.fromEntries(Object.entries(d).slice(-3)),[dlgKey]:{loading:true}}));
   const c=ref.current;
@@ -3900,8 +4044,8 @@ const[lootId,setLootId]=useState(null);
      <div><div className="flex justify-between text-xs mono"><span>{u.sec.toUpperCase()}</span><span>{camp.sec}/{camp.maxSec}</span></div><Bar v={camp.sec} max={camp.maxSec} cls="sec" color="#38bdf8"/></div>
     </div>
     <span className="badge acc hidden sm:inline-block"><CurChip u={u}/>{camp.currency}</span>
-    {camp.universe==='star_wars'&&<button className="btn" style={{minHeight:38,minWidth:38,padding:0}} onClick={openNav} title="Navicomputer" aria-label="Open navicomputer"><Ico n="radar"/></button>}
-    <button className="btn" style={{minHeight:38,minWidth:38,padding:0}} onClick={openShop} title="Depot / Trade" aria-label="Open depot and trade"><Ico n="depot"/></button>
+    {camp.universe==='star_wars'&&<button className="btn" data-ship-open aria-disabled={!hasShip(camp)} style={{minHeight:38,minWidth:38,padding:0,opacity:hasShip(camp)?1:.45}} onClick={openNav} title={hasShip(camp)?'Ship and Travel':'Ship and Travel: no starship available'} aria-label="Open ship and travel"><Ico n="radar"/></button>}
+    <button className="btn" data-hub-open style={{minHeight:38,minWidth:38,padding:0}} onClick={openShop} title="Shop hub" aria-label="Open shop hub"><Ico n="depot"/></button>
     {(camp.loot||[]).length>0&&<button className="btn" data-loot-open style={{minHeight:38,minWidth:38,padding:0,position:'relative'}} onClick={()=>setLootId(camp.loot[camp.loot.length-1].id)} title="Loot containers" aria-label="Open loot containers"><Ico n="crate"/><span className="badge acc" style={{position:'absolute',top:-5,right:-5,padding:'0 .3rem',fontSize:'.6rem'}}>{camp.loot.length}</span></button>}
     <button className="btn" style={{minHeight:38,minWidth:38,padding:0}} onClick={()=>setShowEquip(true)} title="Equipment & Inventory" aria-label="Equipment and inventory"><Ico n="bag"/></button>
     <button className="btn lg:hidden" style={{minHeight:38,minWidth:38,padding:0}} onClick={()=>setDrawer('sheet')} title="Character sheet" aria-label="Character sheet"><Ico n="user"/></button>
@@ -3922,24 +4066,34 @@ const[lootId,setLootId]=useState(null);
       <button className={'btn btn-p '+(tumble?'spin':'')} style={{width:84,height:84,fontSize:'1.6rem',justifyContent:'center'}} onClick={manualRoll} disabled={tumble} aria-label="Roll d20"><Ico n="d20" s={38}/></button>
       <div className="mono text-xs muted mt-2">Tap to roll</div></div>}
      <div ref={feedEnd}/></div>
+    <DiceFx/>
     {/* Dock */}
     <div className="safe-b px-2 pt-2" style={{borderTop:'var(--bw) solid '+(goalMode?'var(--accent)':fOn?'#8b5cf6':'var(--line)'),background:'var(--bg2)'}}>
      {!goalMode&&sceneDock}
      {editId&&<div className="text-xs accent mb-1 flex justify-between">Editing a past action: sending re-branches the story from here.<button className="underline" onClick={()=>{setEditId(null);setInput('')}}>cancel</button></div>}
      {fOn&&!goalMode&&<div className="label mb-1 mx-auto flex justify-between" style={{maxWidth:760,color:'var(--accent)'}}><span>Force Action Mode · {FORCE_COST} Energy · {forceCur(camp)}/{forceMax(camp)}</span><button className="underline" onClick={()=>setForceMode(false)}>cancel</button></div>}
      {goalMode&&<div className="label mb-1 mx-auto flex justify-between" style={{maxWidth:760,color:'var(--accent)'}}><span>Goal capture · Enter to save</span><button className="underline" onClick={()=>setGoalMode(false)}>cancel</button></div>}
-     <div className={"flex gap-2 items-end mx-auto"+(fOn&&!goalMode?" flex-wrap justify-end":"")} style={{maxWidth:760}}>
-      <textarea ref={taRef} className="input flex-1 min-w-0" rows={fOn&&!goalMode?Math.min(4,Math.max(2,Math.ceil(input.length/38))):Math.min(4,Math.max(1,Math.ceil(input.length/38)))} placeholder={goalMode?'Capture a goal or objective…':fOn?'Channel the Force... (type any narrative Force action)':'What do you do?'} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();goalMode?doCapture():submit()}}} style={{resize:'none',...(fOn&&!goalMode?{flex:'1 1 100%'}:null),...(fOn&&!goalMode?{borderColor:'#7dd3fc',boxShadow:'0 0 0 1px rgba(125,211,252,.6),0 0 16px rgba(139,92,246,.5)'}:null)}}/>
-      <button className="btn" title="Quick d20" onClick={quickD20} style={{minHeight:44,minWidth:44,padding:'0 .5rem',justifyContent:'center'}}>d20</button>
-      <button className="btn lg:hidden" title="Actions" onClick={()=>setDrawer('actions')} style={{minHeight:44,minWidth:44,padding:0}} aria-label="Actions"><Ico n="ops"/></button>
-      {forceCan(camp)&&<button className={'btn '+(fOn?'btn-p':'')} title={fOn?'Leave Force Action Mode':'Force Action Mode'} aria-label="Toggle Force Action Mode" aria-pressed={fOn} onClick={()=>{setForceMode(m=>!m);setGoalMode(false)}} style={{minHeight:44,minWidth:44,padding:0}}><Ico n="force"/></button>}
-      <button className={'btn '+(goalMode?'btn-p':'')} title={goalMode?'Cancel goal capture':'Goal capture'} aria-label="Toggle goal capture" aria-pressed={goalMode} onClick={()=>{setGoalMode(m=>!m);setForceMode(false)}} style={{minHeight:44,minWidth:44,padding:0}}><Ico n="flag"/></button>
-      {goalMode?<button className="btn btn-p" onClick={doCapture} disabled={!input.trim()} style={{minHeight:44,minWidth:44,padding:0}} aria-label="Capture goal"><Ico n="plus"/></button>
-       :<button className="btn btn-p" onClick={()=>submit()} disabled={!input.trim()||busy||!!pending} style={{minHeight:44,minWidth:44,padding:0}} aria-label="Send"><Ico n="send"/></button>}</div></div>
+     {camp.fate&&<div className="mx-auto mb-1 flex items-center gap-2" data-fate-bar style={{maxWidth:760}}>
+      <span className="label" style={{color:'var(--accent)',whiteSpace:'nowrap'}}>Rakatan Fate</span>
+      <input type="range" min="1" max="100" step="1" data-fate-range className="flex-1" aria-label="Fate roll value" value={camp.fate.pick||50} onChange={e=>setFate(Number(e.target.value))}/>
+      <input type="number" min="1" max="100" data-fate-num className="input mono" aria-label="Fate number" style={{width:62,minHeight:32,padding:'0 .4rem'}} value={camp.fate.pick||''} placeholder="--" onChange={e=>setFate(e.target.value===''?null:Number(e.target.value))}/>
+      <span className="mono text-xs muted" data-fate-read style={{whiteSpace:'nowrap'}}>{camp.fate.pick?'d20 '+fateToD20(camp.fate.pick)+(camp.fate.pick>=95?' crit':camp.fate.pick<=5?' fumble':''):'random'}</span>
+      <button type="button" className="btn" data-fate-clear onClick={()=>setFate(null)} style={{minHeight:32,fontSize:'.7rem',padding:'0 .5rem'}}>Random</button></div>}
+     <div className="mx-auto" style={{maxWidth:760}}>
+      <textarea ref={taRef} className="input w-full" data-narrative-input rows={1} placeholder={goalMode?'Capture a goal or objective…':fOn?'Channel the Force... (type any narrative Force action)':'What do you do?'} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();goalMode?doCapture():submit()}}} style={{resize:'none',display:'block',width:'100%',boxSizing:'border-box',minHeight:46,maxHeight:'38dvh',overflowY:'auto',lineHeight:1.4,whiteSpace:'pre-wrap',overflowWrap:'anywhere',...(fOn&&!goalMode?{borderColor:'#7dd3fc',boxShadow:'0 0 0 1px rgba(125,211,252,.6),0 0 16px rgba(139,92,246,.5)'}:null)}}/>
+      <div className="flex gap-2 items-center mt-2">
+       <button className="btn" title="Quick d20" onClick={quickD20} style={{minHeight:44,minWidth:44,padding:'0 .5rem',justifyContent:'center'}}>d20</button>
+       <button className="btn lg:hidden" title="Actions" onClick={()=>setDrawer('actions')} style={{minHeight:44,minWidth:44,padding:0}} aria-label="Actions"><Ico n="ops"/></button>
+       {forceGift(camp)&&<button className={'btn '+(fOn?'btn-p':'')} title={fOn?'Leave Force Action Mode':'Force Action Mode'} aria-label="Toggle Force Action Mode" aria-pressed={fOn} onClick={()=>{setForceMode(m=>!m);setGoalMode(false)}} style={{minHeight:44,minWidth:44,padding:0}}><Ico n="force"/></button>}
+       <button className={'btn '+(goalMode?'btn-p':'')} title={goalMode?'Cancel goal capture':'Goal capture'} aria-label="Toggle goal capture" aria-pressed={goalMode} onClick={()=>{setGoalMode(m=>!m);setForceMode(false)}} style={{minHeight:44,minWidth:44,padding:0}}><Ico n="flag"/></button>
+       {goalMode?<button className="btn btn-p flex-1" onClick={doCapture} disabled={!input.trim()} style={{minHeight:44,minWidth:44,padding:0,justifyContent:'center'}} aria-label="Capture goal"><Ico n="plus"/></button>
+        :<button className="btn btn-p flex-1" onClick={()=>submit()} disabled={!input.trim()||busy||!!pending} style={{minHeight:44,minWidth:44,padding:0,justifyContent:'center'}} aria-label="Send"><Ico n="send"/></button>}</div></div></div>
    </main>
    <aside className="hidden lg:block scroll overflow-y-auto">{acts}<Codex camp={camp} dict={dict}/></aside>
   </div>
   {showNav&&camp.universe==='star_wars'&&<NaviModal camp={camp} onJump={jump} onClose={()=>setShowNav(false)}/>}
+  {showHub&&<ShopHub camp={camp} rumorsOn={RUMORS_ON(S)} onWares={()=>{setShowHub(false);setShowShop(true)}} onGossip={hubGossip} onJob={hubJob} onAdd={addRumor} onClose={()=>setShowHub(false)}/>}
+  {showShip&&camp.universe==='star_wars'&&<ShipModal camp={camp} onNav={openNavi} onTalk={shipTalk} onClose={()=>setShowShip(false)}/>}
   {showShop&&<ShopDrawer camp={camp} commit={commit} toast={toast} onClose={()=>setShowShop(false)} onVisit={visitShop}/>}
   {lootId&&<LootModal camp={camp} boxId={lootId} onPick={setLootId} onClaim={claim} onClose={()=>setLootId(null)}/>}
   {showEquip&&<EquipDrawer camp={camp} commit={commit} toast={toast} onClose={()=>setShowEquip(false)} busy={busy||!!pending}
@@ -4042,7 +4196,7 @@ function Wizard({onCreate,onCancel,stock}){
  const[step,setStep]=useState(1);const[uni,setUni]=useState(null);const[era,setEra]=useState(null);const[mi,setMi]=useState(null);
  const[dropNote,setDropNote]=useState([]);const[tplOpen,setTplOpen]=useState(false);const[tpl,setTpl]=useState(null);const[tplNote,setTplNote]=useState('');
  useEffect(()=>{if(!uni||!era)return;const r=pruneLoadout(loadout,uni,era.id);if(r.dropped.length){setLoadout(r.loadout);setDropNote(r.dropped)}else setDropNote([])},[uni,era&&era.id]);
- const[name,setName]=useState('');const[align,setAlign]=useState(null);const[tone,setTone]=useState('gritty');const[species,setSpecies]=useState(null);const[hw,setHw]=useState(null);const[hwCustom,setHwCustom]=useState('');const[cls,setCls]=useState(null);
+ const[name,setName]=useState('');const[align,setAlign]=useState(null);const[tone,setTone]=useState('gritty');const[species,setSpecies]=useState('Human');const[hw,setHw]=useState(null);const[hwCustom,setHwCustom]=useState('');const[cls,setCls]=useState(null);
  const[gender,setGender]=useState('');const[age,setAge]=useState('');const[notes,setNotes]=useState('');const[stats,setStats]=useState(neutralStats());const[sel,setSel]=useState(EMPTY_SEL);const[loadout,setLoadout]=useState(emptyLoadout());const[conv,setConv]=useState(0);
  const eras=uni?ERAS[uni]:[];
  const back=()=>step===1?onCancel():setStep(step-1);
@@ -4065,13 +4219,13 @@ function Wizard({onCreate,onCancel,stock}){
    belt:loadout.belt.map(id=>({name:DBMAP[id].name,id})),vehicle:vehSnap(D(loadout.vehicle))}}};
  const adjStat=(k,d)=>setStats(a=>({...a,[k]:Math.max(statMin(uni,k),Math.min(STAT_MAX,a[k]+d))}));
  const sc=uni&&stock?stock[uni]:null;
- const loadStock=()=>{if(!sc)return;setName(sc.name||'');setSpecies(SPECIES[uni].includes(sc.species)?sc.species:null);
+ const loadStock=()=>{if(!sc)return;setName(sc.name||'');setSpecies(SPECIES[uni].includes(sc.species)?sc.species:'Human');
   const inList=HOMEWORLDS[uni].includes(sc.homeworld)&&sc.homeworld!==CUSTOM;
   if(sc.homeworld){if(inList){setHw(sc.homeworld);setHwCustom('')}else{setHw(CUSTOM);setHwCustom(sc.homeworld)}}else{setHw(null);setHwCustom('')}
   setCls(CLASSES[uni].some(c=>c.name===sc.cls)?sc.cls:null);setGender(sc.gender||'');setAge(sc.age||'');setNotes(sc.notes||'')};
  const applyTemplate=it=>{const sh=npcSheet(it),next={};
   STATS.forEach(K=>{next[K]=Math.max(statMin(uni,K),Math.min(STAT_MAX,sh.pc[K]))});setStats(next);
-  setSpecies(SPECIES[uni].includes(sh.species)?sh.species:null);
+  setSpecies(SPECIES[uni].includes(sh.species)?sh.species:'Human');
   if(sh.homeworld){if(HOMEWORLDS[uni].includes(sh.homeworld)&&sh.homeworld!==CUSTOM){setHw(sh.homeworld);setHwCustom('')}else{setHw(CUSTOM);setHwCustom(sh.homeworld)}}else{setHw(null);setHwCustom('')}
   setCls(CLASSES[uni].some(c=>c.name===sh.class)?sh.class:null);
   const ns={flaws:{},perks:{},styles:{},skills:{},langs:{}};Object.entries(sh.traits||{}).forEach(([g,a])=>{if(!ns[g])return;(a||[]).forEach(([id,lv])=>{if(TRAITS[uni][g].some(t=>t.id===id))ns[g][id]={lv}})});setSel(ns);
@@ -4085,7 +4239,7 @@ function Wizard({onCreate,onCancel,stock}){
  const bioSummary=[species,homeFinal,cls,normAlign(uni,align)].filter(Boolean).join(' · ');
  return <div className="max-w-2xl mx-auto p-3 safe-t">
   <div className="flex items-center gap-2 mb-3"><button className="btn" onClick={back}>←</button><h1 className="head text-3xl flex-1">New Campaign</h1><span className="badge">Step {step}/4</span></div>
-  {step===1&&<div className="grid grid-cols-2 gap-3">{UNIVERSES.map(x=><button key={x.id} disabled={!x.active} className="card p-3 text-left relative" style={{opacity:x.active?1:.5,outline:uni===x.id?'3px solid var(--accent)':'none',cursor:x.active?'pointer':'not-allowed'}} onClick={()=>{setUni(x.id);setEra(null);setMi(null);setSpecies(null);setHw(null);setHwCustom('');setCls(null);setGender('');setAge('');setNotes('');setStats(neutralStats());setSel(EMPTY_SEL);setLoadout(emptyLoadout());setConv(0);setTpl(null);setTplNote('');setStep(2)}}>
+  {step===1&&<div className="grid grid-cols-2 gap-3">{UNIVERSES.map(x=><button key={x.id} disabled={!x.active} className="card p-3 text-left relative" style={{opacity:x.active?1:.5,outline:uni===x.id?'3px solid var(--accent)':'none',cursor:x.active?'pointer':'not-allowed'}} onClick={()=>{setUni(x.id);setEra(null);setMi(null);setSpecies('Human');setHw(null);setHwCustom('');setCls(null);setGender('');setAge('');setNotes('');setStats(neutralStats());setSel(EMPTY_SEL);setLoadout(emptyLoadout());setConv(0);setTpl(null);setTplNote('');setStep(2)}}>
     <div className="mono accent" style={{fontSize:'.78rem',letterSpacing:'.18em',fontWeight:500}}>{x.icon}</div><div className="head text-xl">{x.name}</div><div className="text-xs muted">{x.tag}</div>{!x.active&&<span className="badge acc absolute top-2 right-2">Coming Soon</span>}</button>)}</div>}
   {step===2&&<div className="grid gap-3">{eras.map(e=><button key={e.id} className="card p-3 text-left" onClick={()=>{setEra(e);setMi(null);setStep(3)}}><div className="flex justify-between gap-2 items-baseline"><span className="head text-xl">{e.name}</span><span className="badge">{e.span}</span></div><div className="text-sm muted mt-1">{e.summary}</div></button>)}</div>}
   {step===3&&era&&<div className="grid gap-3"><div className="muted text-sm">Era: <b>{era.name}</b></div>{era.mods.map((m,i)=><button key={i} className="card p-3 text-left" onClick={()=>{setMi(i);setStep(4)}}><div className="head text-xl">{m.title}</div><div className="text-sm mt-1">{m.synopsis}</div><div className="text-sm accent mt-2">◆ Objective: {m.objective}</div></button>)}</div>}
@@ -4093,10 +4247,10 @@ function Wizard({onCreate,onCancel,stock}){
   {step===4&&era&&<div className="card p-4"><div className="muted text-sm mb-3"><b>{era.mods[mi].title}</b> · {era.name}</div>
    {sc&&<button type="button" className="btn btn-p w-full mb-3" style={{minHeight:48}} onClick={loadStock}>Load Stock Character <span className="text-xs opacity-80">({sc.name})</span></button>}
    <div className="flex flex-wrap gap-2 mb-3 items-end">
-    <label className="flex-1" style={{minWidth:190}}><span className="text-sm muted">Character name</span>
-     <div className="flex gap-2"><input className="input" style={{minWidth:0,flex:'1 1 auto'}} value={name} onChange={e=>setName(e.target.value)} placeholder={tpl&&!name?'Enter your own name (Template: '+tpl+')':'Type or roll →'}/>
-      <button type="button" className="btn shrink-0" style={{minHeight:44}} title="Random name (matches species)" aria-label="Random name" onClick={()=>setName(genName(uni,species))}><Ico n="d20"/></button>
-      <button type="button" className="btn shrink-0" style={{minHeight:44,whiteSpace:'nowrap'}} title="Start from an NPC's attributes, class and gear" aria-label="Use NPC template" onClick={()=>setTplOpen(true)}><Ico n="users" s={16}/> NPC Template</button></div></label>
+    <div style={{flex:'1 1 100%',minWidth:0}} data-name-row><label className="block"><span className="text-sm muted">Character name</span>
+     <div className="flex gap-2"><input className="input" data-char-name style={{minWidth:0,flex:'1 1 0%',width:'100%'}} value={name} onChange={e=>setName(e.target.value)} placeholder={tpl&&!name?'Enter your own name (Template: '+tpl+')':'Type or roll a name'}/>
+      <button type="button" className="btn shrink-0" style={{minHeight:44,minWidth:44,justifyContent:'center'}} title="Random name (matches species)" aria-label="Random name" onClick={()=>setName(genName(uni,species))}><Ico n="d20"/></button></div></label>
+     <button type="button" className="btn w-full mt-2" data-npc-template style={{minHeight:40,justifyContent:'center',whiteSpace:'nowrap'}} title="Start from an NPC's attributes, class and gear" aria-label="Use NPC template" onClick={()=>setTplOpen(true)}><Ico n="users" s={16}/> [ NPC Template ]</button></div>
     <label style={{width:112}}><span className="text-sm muted">Gender</span><input className="input" value={gender} onChange={e=>setGender(e.target.value)} placeholder="Female"/></label>
     <label style={{width:80}}><span className="text-sm muted">Age</span><input className="input" value={age} onChange={e=>setAge(e.target.value)} placeholder="27"/></label></div>
    {tplNote&&<div className="note mb-3 text-sm">{tplNote}</div>}
@@ -4118,9 +4272,53 @@ function Wizard({onCreate,onCancel,stock}){
    <button className="btn btn-p w-full" disabled={!ready} onClick={()=>onCreate({uni,era,mi,name:name.trim(),species,homeworld:homeFinal,cls,gender:gender.trim(),age:age.trim(),notes:notes.trim(),alignment:normAlign(uni,align)||alignDefault(uni),tone,stats,traits:build.traits,bonus:finalBonus,hpMod:build.hpMod,gear:buildGear()})}>Begin Campaign</button>
    {!ready&&<div className="text-xs muted mt-2 text-center">{missing.length?'Still needed: '+missing.join(', ')+(missing.some(m=>m!=='name')?' (open Bio)':'')+'.':'Points left cannot be negative.'}</div>}</div>}
  </div>}
-function newCamp({uni,era,mi,name,species,homeworld,cls,gender,age,notes,alignment,tone,stats,traits,bonus,hpMod,gear}){
+function newCampBase({uni,era,mi,name,species,homeworld,cls,gender,age,notes,alignment,tone,stats,traits,bonus,hpMod,gear}){
  const A=CLASSES[uni].find(a=>a.name===cls),mod=era.mods[mi],sc=SCENES[uni][0];const hp=Math.max(10,A.hp+(hpMod||0));
  return {id:uid(),universe:uni,eraId:era.id,modIdx:mi,objective:mod.objective,name,species,homeworld,gender,age,notes,alignment:normAlign(uni,alignment)||alignDefault(uni),tone:TONES.some(t=>t.id===tone)?tone:'gritty',arche:A.name,stats,traits,bonus:bonus||{},hp,maxHp:hp,sec:A.sec,maxSec:A.sec,currency:gear?gear.cash:60,dr:gear?gear.dr:0,loadout:gear?gear.loadout:null,inventory:[...A.inv.map(n=>({id:uid(),name:n})),...(gear?gear.pack.map(i=>({id:uid(),name:i.name,db:i.id})):[])],quests:[{id:uid(),title:mod.objective}],feed:[],turn:0,scene:0,setting:sc.name,dyn:sc.actions,goals:[],timelines:[],day:1,created:Date.now()}}
+
+/* ---------- The Cargo campaign module (Star Wars, every era) ---------- */
+const MARWINN_TITLE={oldrep:'Sith Overseer',highrep:'Grand Supervisor',fall:'Military Governor',empire:'Moff',rebellion:'Moff',njo:'Moff',newrep:'Warlord',firstorder:'Warlord'};
+const MARWINN_PLOT={oldrep:'scheming against the Dark Council',highrep:'a corrupt Republic official seeking martial rule',fall:'misappropriating Grand Army funds',empire:'plotting a coup against the Emperor',rebellion:'plotting a coup against the Emperor',njo:'plotting a coup against the One Sith',newrep:'commanding an Imperial Remnant flotilla',firstorder:'commanding an Imperial Remnant flotilla'};
+const marwinnTitle=id=>MARWINN_TITLE[id]||'Moff';
+const CARGO_IDS={serum:'star_wars-ancient-rakatan-force-serum',chip:'star_wars-ancient-rakatan-upgrade-chip',ship:'star_wars-the-ebon-krayt'};
+const CARGO_REWARD=1000000;
+ERAS.star_wars.forEach(e=>e.mods.push({title:'The Cargo',cargo:true,synopsis:'Mid-hyperspace aboard your ship, the Ebon Krayt, halfway between Tatooine and Coruscant, you alone hear a rhythmic psychic thumping from an unmarked crate in the hold. Your pilot and your droid hear nothing. A contract worth 1,000,000 credits waits at the Coruscant spires for an unnamed client.',objective:'Deliver the unmarked crate to the client at the Coruscant spires for 1,000,000 credits, or find out what is thumping inside it.'}));
+const CARGO_FACTS='the Ebon Krayt is a matte-black HWK-290 light freighter; Vex Harkin is its 45-year-old Besalisk pilot (brash, foul-mouthed, chain-smokes cigarras, fiercely loyal); DV-V3 is a matte-black DUM-series pit droid, master slicer, sarcastic, hoards shiny treasures';
+const cargoBrief=c=>`Begin the campaign mid-hyperspace aboard the Ebon Krayt, halfway between Tatooine and Coruscant. Facts: ${CARGO_FACTS}. Only the player perceives a rhythmic psychic thumping from an unmarked crate in the hold; Vex and DV-V3 cannot hear it. The contract pays 1,000,000 credits on delivery to an unnamed client at the Coruscant spires. Do not name the client. Offer no new items; end by asking what the player does.`;
+const cargoOpening=()=>['**The Cargo.** Mid-hyperspace aboard the Ebon Krayt, halfway between Tatooine and Coruscant. Blue-white light streams past the cockpit glass while Vex Harkin, a broad four-armed Besalisk, chews a cigarra and swears at the nav board. Behind you in the hold, DV-V3 pokes through a bin of scrap and pockets something shiny.','Only you can feel it: a slow, rhythmic psychic thumping from the unmarked crate lashed to the hold floor. Vex hears nothing. DV-V3 hears nothing.','The contract is simple: one million credits on delivery to an unnamed client at the Coruscant spires. You can inspect the crate, open it, or ignore it and keep flying.'];
+function cargoSetup(c,era){
+ const L={primary:null,sidearm:null,apparel:null,belt:[],...(c.loadout||{})};L.vehicle=vehSnap(DBMAP[CARGO_IDS.ship]);
+ const vex=mkCompanion(c,{id:'vex-harkin',name:'*Vex Harkin',role:'Pilot'},'ship');vex.role='copilot';
+ const dv=mkCompanion(c,{id:'dv-v3',name:'*DV-V3',role:'Slicer'},'ship');
+ return {...c,loadout:L,companions:[vex,dv],cargo:[{id:uid(),name:'Unmarked Cargo Crate',crate:true}],aboard:true,planet:'tatooine',setting:'Ebon Krayt, in hyperspace',
+  dyn:['Inspect the unmarked crate','Open the crate','Ask Vex how long until Coruscant','Check the nav console','Ignore the crate and keep flying'],cargoQ:{stage:'hold',title:marwinnTitle(era.id)}}}
+function cargoSheet(c){const q=c.cargoQ;if(!q||q.stage==='delivered')return null;const o={};
+ if(q.stage==='hold')o.cargo_quest=`Only the player senses psychic thumping from the unmarked crate in the hold; Vex Harkin and DV-V3 hear nothing. Contract: 1,000,000 cr on delivery to an unnamed client at the Coruscant spires (secret: ${q.title} Marwinn, ${MARWINN_PLOT[c.eraId]||''}); reveal only at the handoff.`;
+ else o.cargo_quest=`Crate opened. Contract still pending: 1,000,000 cr at the Coruscant spires (${q.title} Marwinn, reveal at handoff).`;
+ if(c.serum)o.rakatan_serum='Player drank it: stats 40, unlimited Force, Fate Scroller.';
+ if(c.chip)o.rakatan_chip='DV-V3 upgraded: slicing always succeeds.';return o}
+function cargoCmd(c,text){
+ const q=c.cargoQ;if(!q)return null;const t=String(text),S1=s=>({id:uid(),type:'system',text:s});let out=null;
+ const inv=n=>(c.inventory||[]).find(i=>i.db===n);
+ if(q.stage==='hold'&&(/\b(open|pry|crack|unseal|unlatch|break|cut|force)\b[^.]*\b(crate|package|cargo|container|box|freight|lid|seal)\b/i.test(t)||/\b(look|peer|search)\b[^.]*\binside\b[^.]*\b(crate|package|cargo|container|box)\b/i.test(t))){
+  const mk=id=>({id:uid(),name:DBMAP[id].name,db:id}),items=[mk(CARGO_IDS.serum),mk(CARGO_IDS.chip)],inventory=[...(c.inventory||[])],cargo=[...(c.cargo||[])];
+  items.forEach(it=>{if(inventory.length<8)inventory.push(it);else cargo.push(it)});
+  out={...c,inventory,cargo:cargo.map(x=>x.crate?{...x,name:'Opened Cargo Crate',opened:true}:x),cargoQ:{...q,stage:'opened'},feed:[...c.feed,S1(`[SYSTEM: Cargo Crate Opened | Contents: ${items.map(i=>i.name).join(', ')} | The thumping stops]`)]};return out}
+ if(c.cargoQ&&inv(CARGO_IDS.serum)&&!c.serum&&/\b(drink|drank|consume|swallow|ingest|quaff|inject|use|take|down|sip)\b[^.]*\bserum\b/i.test(t)){
+  const stats=Object.fromEntries(Object.keys(c.stats||{}).map(k=>[k,40])),it=inv(CARGO_IDS.serum);
+  out={...c,serum:true,stats,force_awakened:true,fate:{on:true,pick:null},inventory:c.inventory.filter(i=>i.id!==it.id),cargo:(c.cargo||[]).filter(i=>i.id!==it.id)};
+  out=forceSet(out,forceMax(out));FATE.on=true;FATE.pick=null;
+  out.feed=[...c.feed,S1('[SYSTEM: Rakatan Serum | Midi-chlorians: 100,000 | All Force powers unlocked at 0 energy cost | All stats set to 40 | Rakatan Fate Scroller active]')];return out}
+ if(inv(CARGO_IDS.chip)&&!c.chip&&/\b(install|insert|slot|fit|plug|graft|implant|give|feed|upgrade|use|load|hand)\b[^.]*\bchip\b/i.test(t)){
+  const it=inv(CARGO_IDS.chip);
+  out={...c,chip:true,inventory:c.inventory.filter(i=>i.id!==it.id),companions:crewList(c).map(x=>x.id==='dv-v3'?{...x,upgraded:true}:x),feed:[...c.feed,S1('[SYSTEM: Rakatan Upgrade Chip | DV-V3 upgraded | Permanent undetectable HoloNet intrusion | Slicing checks succeed instantly]')]};return out}
+ if(q.stage!=='delivered'&&(c.cargo||[]).some(x=>x.crate)&&/\b(deliver|hand over|hand off|drop off|unload|transfer|present|sell)\b[^.]*\b(crate|package|cargo|freight|container|client|marwinn)\b/i.test(t)){
+  const who=`${q.title} Marwinn`;
+  if(c.planet!=='coruscant')return {...c,feed:[...c.feed,S1('[SYSTEM: Contract | The delivery point is the Coruscant spires. Use the Navicomputer to reach Coruscant first.]')]};
+  const sealed=q.stage==='hold';
+  return {...c,currency:(c.currency||0)+CARGO_REWARD,cargo:(c.cargo||[]).filter(x=>!x.crate),cargoQ:{...q,stage:'delivered',sealed},feed:[...c.feed,S1(`[SYSTEM: Contract Complete | +${CARGO_REWARD.toLocaleString('en-US')} credits | Client: ${who}${sealed?'':' | Seal broken: '+who+' demands the missing relics'}]`)]}}
+ return null}
+function newCamp(a){const c=newCampBase(a),mod=a.era.mods[a.mi];return a.uni==='star_wars'&&mod&&mod.cargo?cargoSetup(c,a.era):c}
 
 /* ============================== APP ============================== */
 function App(){
