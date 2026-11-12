@@ -570,7 +570,10 @@ const COMPENDIUM={
   G(SW,'Ration Pack',T_FILMS,'Supplies',10,'Compressed meals for several days.'),
   G(SW,'Engineer Toolkit',T_FILMS,'Tool',150,'A full kit for repairs on droids, vehicles and gear.'),
   G(SW,'Breath Mask',T_FILMS,'Tool',90,'A filter mask for bad air and vacuum emergencies.'),
-  G(FR,'Healing Potion',T_FR,'Consumable',50,'A vial of red liquid that knits wounds.',true),
+  G(FR,'Health Potion',T_FR,'Consumable',50,'A vial of red liquid that knits wounds. Restores 12 HP.',true),
+  G(FR,'Herbal Salve',T_FR,'Consumable',20,'A pot of crushed healing herbs and beeswax. Restores 6 HP.',true),
+  A(FR,"Traveler's Garb",T_FR,1,0,0,5,'A sturdy cloak, tunic and boots built for the road.'),
+  A(FR,'Mage Robes',T_FR,2,4,0,120,'Silk-lined robes stitched with warding thread that blunt hostile magic.'),
   G(FR,'Potion of Climbing',T_FR,'Consumable',75,'Makes your hands stick to any surface for an hour.',true),
   G(FR,"Thieves' Tools",T_FR,'Tool',25,'Picks, files and a small mirror for locks and traps.'),
   G(FR,'Hempen Rope',T_FR,'Tool',2,'Fifty feet of strong rope.'),
@@ -642,7 +645,11 @@ const COMPENDIUM_EXTRA=[
 const T_CARGO=['The Cargo','Homebrew'];
 COMPENDIUM_EXTRA.push(
  {...G(SW,'Ancient Rakatan Force Serum',['The Cargo','Rakatan','Relic'],'Relic',0,'An ingestible relic of the Infinite Empire, a vial of living bio-tech that hums against the skin. Drinking it floods the body with a midichlorian surge of 100,000, unlocks every Force power at zero energy cost, fixes every attribute at 40 for good with no adverse effects, and wakes the permanent Rakatan Fate Scroller.'),category:'relic'},
- {...G(SW,'Ancient Rakatan Upgrade Chip',['The Cargo','Rakatan','Relic'],'Relic',0,'A solid Aurodium cyber-core engraved with Rakatan glyphs, built to be slotted into a droid. In DV-V3 it grants permanent, undetectable HoloNet intrusion and instant slicing across any planetary database.'),category:'relic'},
+ {...G(SW,'Ancient Rakatan Upgrade Chip',['The Cargo','Rakatan','Relic'],'Relic',0,'A solid Aurodium cyber-core engraved with Rakatan glyphs, built to be slotted into a droid. In DV-V3 it grants permanent, undetectable HoloNet intrusion and instant slicing across any planetary database. Its blueprint archives hold the schematics for the Rakatan Forge, Rakatan Factory, Rakatan Cloning Facility and Rakatan Field.'),category:'relic'},
+ {...G(SW,'Rakatan Forge',['Rakatan','Blueprint Archive','Ancient Tech'],'Ancient Tech',0,'Compact ancient transmutation machine capable of instantly converting common matter into rare metals and plasma at 4x strength and 0.25x weight.'),category:'ancient_tech',summary:'Compact ancient transmutation machine capable of instantly converting common matter into rare metals and plasma at 4x strength and 0.25x weight.',dossier:'Instant transmutation of water or sand into Beskar, Cortosis, Phrik, Obsidian, Aurodium, or Coaxium. Outputs are molecularly identical to the natural metal but reinforced to 4x durability at 0.25x mass. Blueprints stored in the *Ancient Rakatan Upgrade Chip.',archive:'Ancient Rakatan Upgrade Chip'},
+ {...G(SW,'Rakatan Factory',['Rakatan','Blueprint Archive','Ancient Tech'],'Ancient Tech',0,'Automated Star Forge-tier production matrix powered by Coaxium, constructing starships, droids, and weapons at staggering speed.'),category:'ancient_tech',summary:'Automated Star Forge-tier production matrix powered by Coaxium, constructing starships, droids, and weapons at staggering speed.',dossier:'Continuous rapid fabrication of fleets and ground assets without the dark-side stellar tap the Star Forge required, running on Coaxium fuel cells. Blueprints stored in the *Ancient Rakatan Upgrade Chip.',archive:'Ancient Rakatan Upgrade Chip'},
+ {...G(SW,'Rakatan Cloning Facility',['Rakatan','Blueprint Archive','Ancient Tech'],'Ancient Tech',0,'Rapid-gestation cloning center producing fully trained, customized clones of any species to any age in 2 weeks, powered by Coaxium.'),category:'ancient_tech',summary:'Rapid-gestation cloning center producing fully trained, customized clones of any species to any age in 2 weeks, powered by Coaxium.',dossier:'14-day vat maturation with zero genetic decay. Full modular editing of species, traits, combat skills, and hardcoded loyalty. Powered by Coaxium. Blueprints stored in the *Ancient Rakatan Upgrade Chip.',archive:'Ancient Rakatan Upgrade Chip'},
+ {...G(SW,'Rakatan Field',['Rakatan','Blueprint Archive','Ancient Tech'],'Ancient Tech',0,'Sector-wide force barrier resembling impenetrable gas that obliterates invading craft via an undetectable electromagnetic minefield.'),category:'ancient_tech',summary:'Sector-wide force barrier resembling impenetrable gas that obliterates invading craft via an undetectable electromagnetic minefield.',dossier:'Projects an impenetrable gaseous barrier across an entire sector. Any entering vessel is destroyed instantly by an invisible electromagnetic mine grid. Construction schematics stored in the *Ancient Rakatan Upgrade Chip.',archive:'Ancient Rakatan Upgrade Chip'},
  {...V(SW,'The Ebon Krayt',T_CARGO,'Freighter',9,6,11,15,6,120000,5,'A custom matte-black HWK-290 light freighter, beaten and scarred on the outside, with hyper-tuned drives, shields and sensors hidden inside the plating.','Cramped hold; fast for its size.'),berth:3}
 );
 COMPENDIUM.npcs.push(
@@ -705,7 +712,10 @@ const EXP_ITEMS=[
  /* Forgotten Realms: Alchemist */
  {...G(FR,'Potion of Greater Healing',T_FR,'Consumable',150,'A vial of bright red liquid that closes serious wounds.',true),shops:['spares']},
  {...G(FR,'Potion of Warding',T_FR,'Consumable',120,'A shimmering draught that raises a ward around the drinker.',true),shops:['spares']},
- {...G(FR,'Antitoxin Vial',T_FR,'Consumable',50,'A bitter antidote that blunts poisons.',true),shops:['spares']},
+ {...G(FR,'Antitoxin',T_FR,'Consumable',50,'A bitter antidote that blunts poisons.',true),shops:['spares']},
+ {...G(FR,'Drow Sleep Poison',['Black Market'],'Tool',90,'A pale venom that drops a victim into a deep sleep within moments. Sold in sealed vials.'),black:true},
+ {...G(FR,'Basilisk Venom',['Black Market'],'Tool',160,'A greasy green venom milked from a basilisk, prized by assassins and illegal to carry.'),black:true},
+ {...G(FR,'Philter of Madness',['Black Market'],'Tool',140,'An unlicensed alchemical concoction that clouds the mind of whoever drinks it.'),black:true},
  /* Forgotten Realms: Shadow Enchanter */
  {...G(FR,'Focus Crystal of Intellect',['Arcane'],'Implant',600,'A fractured crystal that hums when you think. Raises INT while attuned.'),implant:{stat:'INT',amt:2},shops:['ripper']},
  {...G(FR,'Focus Crystal of Insight',['Arcane'],'Implant',600,'A smoky crystal that sharpens intuition. Raises WIS while attuned.'),implant:{stat:'WIS',amt:2},shops:['ripper']},
@@ -869,11 +879,15 @@ const LORE_META={
  'star_wars-children-of-the-watch':[null,'5-5',null]};
 const eraRange=e=>String(e).includes(',')?String(e).split(',').map(Number):(a=>Array.from({length:a[1]-a[0]+1},(_,i)=>a[0]+i))(String(e).split('-').map(Number));
 const FR_META={weapon:['melee_blade','*Waterdeep Smithy Guild'],armor:['armor_plate',"*Baldur's Gate Armorers"],vehicle:['speeder_bike','*Sword Coast Wainwrights'],gear:['survival','*Waterdeep Alchemists & Outfitters']};
-const FR_CAT={'dagger':'melee_blade','shortbow':'blaster_rifle','longbow':'blaster_rifle','light-crossbow':'blaster_rifle','heavy-crossbow':'blaster_rifle','alchemist-s-fire':'grenade','acid-vial':'grenade','covered-merchant-wagon':'landspeeder','river-caravel':'light_freighter',"smuggler-s-hand-crossbow":'blaster_rifle','black-lotus-vial':'grenade','poison-coated-bolts':'weapon_mod','potion-of-greater-healing':'medical','potion-of-warding':'medical','antitoxin-vial':'medical','rowboat':'light_freighter','healing-potion':'medical','thieves-tools':'slicing'};
+const FR_CAT={'dagger':'melee_blade','shortbow':'blaster_rifle','longbow':'blaster_rifle','light-crossbow':'blaster_rifle','heavy-crossbow':'blaster_rifle','alchemist-s-fire':'grenade','acid-vial':'grenade','covered-merchant-wagon':'landspeeder','river-caravel':'light_freighter',"smuggler-s-hand-crossbow":'blaster_rifle','black-lotus-vial':'grenade','poison-coated-bolts':'weapon_mod','potion-of-greater-healing':'medical','potion-of-warding':'medical','antitoxin':'medical','rowboat':'light_freighter','health-potion':'medical','herbal-salve':'medical','traveler-s-garb':'outerwear','mage-robes':'tunic','drow-sleep-poison':'weapon_mod','basilisk-venom':'weapon_mod','philter-of-madness':'weapon_mod','thieves-tools':'slicing'};
 const ERA_RANGE_CACHE={},eraKeysOf=r=>ERA_RANGE_CACHE[r]||(ERA_RANGE_CACHE[r]=eraRange(r).map(i=>ERA_KEYS[i]));
 Object.assign(LORE_META,{
  'star_wars-ancient-rakatan-force-serum':['relic','0-7','*Rakatan Infinite Empire',1],
  'star_wars-ancient-rakatan-upgrade-chip':['relic','0-7','*Rakatan Infinite Empire',1],
+ 'star_wars-rakatan-forge':['ancient_tech','0-7','*The Infinite Empire (Rakatan)',1],
+ 'star_wars-rakatan-factory':['ancient_tech','0-7','*The Infinite Empire (Rakatan)',1],
+ 'star_wars-rakatan-cloning-facility':['ancient_tech','0-7','*The Infinite Empire (Rakatan)',1],
+ 'star_wars-rakatan-field':['ancient_tech','0-7','*The Infinite Empire (Rakatan)',1],
  'star_wars-the-ebon-krayt':['light_freighter','0-7','*Corellian Galaxy Technologies',1],
  'star_wars-vex-harkin':[null,'0-7',null,1],
  'star_wars-dv-v3':[null,'0-7',null,1],
@@ -906,7 +920,7 @@ function customizeApparel(it,q,m){
  const mat=COMPENDIUM.materials[it.uni][m],qd=COMPENDIUM.qualityDelta[q],cl=v=>Math.max(0,Math.min(20,v));
  const qm=q===0?0.5:q<=3?1:1+0.6*(q-3),mm=m===0?0.5:m<=3?1:Math.pow(1.5,m-3);
  return {ar:cl(it.ar+qd+mat.ar),er:cl(it.er+qd+mat.er),enc:cl(it.enc+mat.enc+(q<=1?1:q>=6?-1:0)),price:Math.max(1,Math.round(it.worth*qm*mm)),qname:COMPENDIUM.quality[q],mname:mat.n}}
-const STEP_CR={star_wars:500,forgotten_realms:50},CR_ABBR={star_wars:'cr',forgotten_realms:'gp'};
+const STEP_CR={star_wars:500,forgotten_realms:50},CR_ABBR={star_wars:'cr',forgotten_realms:'GP'};
 const emptyLoadout=()=>({primary:null,sidearm:null,apparel:null,belt:[],pack:[],vehicle:null});
 function loadoutCost(L){let c=0;['primary','sidearm'].forEach(k=>{if(L[k])c+=DBMAP[L[k]].worth});
  if(L.apparel)c+=customizeApparel(DBMAP[L.apparel.id],L.apparel.q,L.apparel.m).price;
@@ -1455,7 +1469,7 @@ function equipFromPack(c,it,d){const L=getLoadout(c)||{},pack=c.inventory||[];if
  return {c:{...c,loadout:{...L,[slot]:sn},inventory:[...pack.filter(x=>x.id!==it.id),...(back?[back]:[])]},msg:d.name+' equipped'+(old?' ('+old.name+' returned to pack)':'')}}
 /* ---- procedural scene & environment ---- */
 const ENV_LABELS={star_wars:{light:['Binary Noon','Neon Dusk','Pitch Black','Eclipse','Dawn Mist'],haz:['Clear / Temperate','Acid Rain','Blinding Sandstorm','Ion Fog','Toxic Smog'],sec:['Active Checkpoints','Underground Truce','Gang Turf War','Deserted Lockdown']},
- forgotten_realms:{light:['Noon Glare','Golden Dusk','Moonless Night','Eclipse','Dawn Mist'],haz:['Clear / Temperate','Torrential Rain','Blinding Sandstorm','Heavy Fog','Ash Fall'],sec:['Watch Checkpoints','Thieves\' Truce','Gang Turf War','Deserted Lockdown']}};
+ forgotten_realms:{light:['Mountain Glare','Golden Dusk','Moonless Night','Eclipse','Dawn Mist'],haz:['Clear / Temperate','Torrential Rain','Blinding Sandstorm','Heavy Fog','Ash Fall'],sec:['Watch Checkpoints','Thieves\' Truce','Gang Turf War','Deserted Lockdown']}};
 /* mechanical effects: rng = +DC to every ranged weapon attack (player, companions, enemies); shd = shield recharge multiplier */
 const ENV_RULE={'Blinding Sandstorm':{rng:2,tag:'+2 DC ranged'},'Toxic Smog':{rng:2,tag:'+2 DC ranged'},'Heavy Fog':{rng:2,tag:'+2 DC ranged'},'Ion Fog':{shd:0.5,tag:'Shields -50%'},'Acid Rain':{shd:0.5,tag:'Shields -50%'}};
 const ENV_TXT={'Binary Noon':'Twin suns hammer the streets; shadows are knife-edged.','Neon Dusk':'Signs bleed colour across wet surfaces; crowds thicken.','Pitch Black':'No ambient light; sound and touch carry the scene.','Eclipse':'A dead, copper half-light mutes colour and unsettles animals.','Dawn Mist':'Low pale haze softens edges and swallows distant sound.',
@@ -1466,6 +1480,7 @@ const ENV_TXT={'Binary Noon':'Twin suns hammer the streets; shadows are knife-ed
 function envWeights(c){const L=ENV_LABELS[c.universe]||ENV_LABELS.star_wars,p=c.universe==='star_wars'?planetOf(c):null,t=p?p.terrain:'TM';const sw=c.universe==='star_wars';
  const light=[[L.light[0],t==='DS'||t==='BR'?30:8],[L.light[1],t==='IN'||t==='EC'?30:16],[L.light[2],14],[L.light[3],5],[L.light[4],['OC','FO','SW','JG','IC'].includes(t)?26:12]];
  let h=[10,8,8,8,8];/* clear, acid/rain, sandstorm, ion/fog, smog/ash */
+ if(!sw){h=[40,26,2,24,8]}
  if(t==='DS')h=[30,2,45,6,3];else if(t==='IN'||t==='EC')h=[28,22,2,10,30];else if(t==='VL')h=[20,10,2,20,30];else if(t==='SW'||t==='JG')h=[26,28,2,12,14];
  else if(t==='IC')h=[30,4,14,28,4];else if(t==='BR')h=[30,4,28,22,4];else if(t==='OC'||t==='GG')h=[28,20,2,24,3];else h=[52,10,6,10,6];
  const law=p?planetLaw(p,planetEraKey(c)):'Frontier';let s=[10,10,10,10];
@@ -1501,7 +1516,7 @@ function useBooster(c,text){
  n.feed=[...n.feed,{id:uid(),type:'item',text:line}];return {c:n,line}}
 /* ============================== 2-LAYER MERCHANT ENGINE: ARCHETYPE + SUBTYPE ============================== */
 const MERCH_SUBS={star_wars:{arms:[['mil','Military Quartermaster'],['black','Underworld Gunrunner'],['frontier','Frontier Outfitter']],tech:[['spares','Droid & Vehicle Spares'],['ripper','Street Ripper']],hosp:[['lounge','Core World Lounge'],['dive','Dive Cantina']]},
- forgotten_realms:{arms:[['mil','City Armory'],['black','Black Market Fence'],['frontier','Blacksmith & Stables']],tech:[['spares','Alchemist'],['ripper','Shadow Enchanter']],hosp:[['lounge','High-End Guildhouse'],['dive','Frontier Tavern']]}};
+ forgotten_realms:{arms:[['mil','Blacksmith & Armorer'],['black','Underworld Fence'],['frontier','General Outfitter']],tech:[['spares','Apothecary & Herbalist'],['ripper','Shadow Enchanter']],hosp:[['lounge','High-End Guildhouse'],['dive','Frontier Tavern']]}};
 const MERCH_ARCH_LABEL={star_wars:{arms:'Arms Dealer',tech:'Tech & Cybernetics',hosp:'Hospitality & Provisions'},forgotten_realms:{arms:'Arms Dealer',tech:'Arcane Relics',hosp:'Hospitality & Provisions'}};
 const subLabel=(uni,arch,sub)=>((((MERCH_SUBS[uni]||MERCH_SUBS.star_wars)[arch])||[]).find(x=>x[0]===sub)||[0,''])[1];
 const specKey=s=>s.arch+'.'+s.sub;
@@ -1533,7 +1548,7 @@ function merchPool(c,spec){const sw=c.universe==='star_wars',ok=i=>i.uni===c.uni
  if(k==='arms.mil')return all.filter(i=>!i.black&&((!sh(i).length&&((W(i)&&(sw?MIL_W.includes(i.type):['Martial Weapon','Ranged Weapon'].includes(i.type)))||(Ar(i)&&(sw?MIL_A.includes(i.type):i.type!=='Field Pack'))))||sh(i).includes('mil')));
  if(k==='arms.black')return all.filter(i=>i.black&&(W(i)||i.category==='weapon_mod'));
  if(k==='arms.frontier')return all.filter(i=>!i.black&&(sh(i).includes('frontier')||(!sh(i).length&&(W(i)||Ar(i))&&cheap(i)&&i.type!=='Ordnance'&&i.type!=='Apparel')||(Gr(i)&&!sh(i).length&&['Tool','Supplies'].includes(i.type)&&!['ship_parts','slicing','weapon_mod'].includes(i.category))||(i.cat==='vehicle'&&(sw?['Speeder','Landspeeder'].includes(i.type)&&i.worth<=12000:true))));
- if(k==='tech.spares')return all.filter(i=>!i.black&&(sh(i).includes('spares')||(sw&&Gr(i)&&['ship_parts','medical'].includes(i.category))||(!sw&&((Gr(i)&&/potion|vial|antitoxin|tools|lantern/i.test(i.name))||(W(i)&&i.type==='Ordnance'&&!i.black)))));
+ if(k==='tech.spares')return all.filter(i=>!i.black&&(sh(i).includes('spares')||(sw&&Gr(i)&&['ship_parts','medical'].includes(i.category))||(!sw&&((Gr(i)&&/potion|vial|antitoxin|salve|tools|lantern/i.test(i.name))||(W(i)&&i.type==='Ordnance'&&!i.black)))));
  if(k==='tech.ripper')return all.filter(i=>sh(i).includes('ripper')||(sw&&i.black&&['slicing','medical'].includes(i.category))||(sw&&/^stim injector$/i.test(i.name)));
  if(spec.arch==='hosp')return all.filter(i=>sh(i).includes(spec.sub));
  return []}
@@ -1550,7 +1565,7 @@ function shopPolicy(c,spec0){const spec=typeof spec0==='boolean'?(spec0?{arch:'a
 /* hospitality: drinks and meals apply instantly (clear mental debuffs; lounges grant +1 PRS/CHA on your next social check); beds are a sheltered rest */
 const MENTAL_STATS=['INT','WIS','CHA'];
 function lodge(c,d){let n={...c,hp:c.maxHp,shopRot:(c.shopRot||0)+1};
- if(c.universe==='star_wars')n=shieldRest(n,true);else n={...n,sec:c.maxSec};
+ if(c.universe==='star_wars')n=shieldRest(n,true);else n=stamOn(c)?{...n,sec:stamMax(c),maxSec:stamMax(c)}:{...n,sec:c.maxSec};
  n=crewRest(n);n=forceFill(n);n=magicFill(n);n={...n,env:rollEnv({...n,turn:n.turn},'rest')};
  n=advanceDay(n,1,'lodging');return n}
 function applyProvision(c,d){const ab=statLabel(c.universe,'CHA').abbr;
@@ -1569,15 +1584,31 @@ function installImplant(c,it,d){const im=c.implants||[];if(!d||!d.implant)return
  return {c:{...c,implants:[...im,e],inventory:c.inventory.filter(x=>x.id!==it.id),feed:[...c.feed,{id:uid(),type:'item',text:`${c.universe==='star_wars'?'INSTALLED':'ATTUNED'}: ${d.name} (${d.implant.stat} ${d.implant.amt>0?'+':''}${d.implant.amt}). Effective ${d.implant.stat} ${effStat({...c,implants:[...im,e]},d.implant.stat)}.`}]},msg:d.name+' active'}}
 /* ============================== SPELLCASTING ENGINE (magic parity with the Force) ============================== */
 const magicOn=c=>!!c&&c.universe==='forgotten_realms';
-const magicAbility=c=>Math.max(0,Math.min(STAT_HARD,Math.max(effStat(c,'INT'),effStat(c,'WIS'))));
-const magicStat=c=>effStat(c,'INT')>=effStat(c,'WIS')?'INT':'WIS';
+const FR_CASTER={Wizard:'INT',Cleric:'WIS',Druid:'WIS',Warlock:'CHA',Bard:'CHA'};
+const frKnownCls=c=>!!c&&(CLASSES.forgotten_realms||[]).some(x=>x.name===c.arche);
+const magicStat=c=>FR_CASTER[c&&c.arche]||(effStat(c,'INT')>=effStat(c,'WIS')?'INT':'WIS');
+const magicAbility=c=>Math.max(0,Math.min(STAT_HARD,effStat(c,magicStat(c))));
 const MAGIC_MIN=5;
-const magicCan=c=>magicOn(c)&&(magicAbility(c)>=MAGIC_MIN||!!c.magic_awakened);
+const magicCan=c=>magicOn(c)&&(!!FR_CASTER[c.arche]||!!c.magic_awakened||(!frKnownCls(c)&&magicAbility(c)>=MAGIC_MIN));
 const magicMax=c=>Math.max(magicAbility(c),c&&c.magic_awakened?MAGIC_MIN:0)*5;
 const magicCur=c=>{const m=magicMax(c),e=c&&c.spell&&c.spell.energy;return e==null?m:Math.max(0,Math.min(m,Math.floor(e)))};
 const magicSet=(c,e)=>({...c,spell:{...(c.spell||{}),energy:Math.max(0,Math.min(magicMax(c),Math.floor(e)))}});
-const magicFill=c=>magicCan(c)&&magicCur(c)<magicMax(c)?magicSet(c,magicMax(c)):c;
+/* non-casters: the secondary bar is Stamina (spent on Maneuvers) */
+const stamOn=c=>magicOn(c)&&!magicCan(c);
+const stamMax=c=>5*Math.max(1,effStat(c,'CON'),effStat(c,'STR'),effStat(c,'DEX'));
+const stamCur=c=>{const m=stamMax(c),e=c&&c.sec;return e==null?m:Math.max(0,Math.min(m,Math.floor(e)))};
+const secView=c=>!magicOn(c)?{label:(UNI[c.universe]||{}).sec||'Shields',cur:c.sec,max:c.maxSec}:magicCan(c)?{label:'Mana',cur:magicCur(c),max:magicMax(c)}:{label:'Stamina',cur:stamCur(c),max:stamMax(c)};
+const magicFill=c=>stamOn(c)?(stamCur(c)<stamMax(c)?{...c,sec:stamMax(c),maxSec:stamMax(c)}:c):magicCan(c)&&magicCur(c)<magicMax(c)?magicSet(c,magicMax(c)):c;
 const magicGain=(c,n)=>magicCan(c)&&magicCur(c)<magicMax(c)?magicSet(c,magicCur(c)+n):c;
+const MANEUVER={id:'power_strike',name:'Power Strike',cost:6,desc:'A committed, heavy blow: +2 to hit and bonus damage.'};
+function maneuverUse(c){if(!stamOn(c))return {err:'Maneuvers are for characters without spellcasting'};
+ const cur=stamCur(c);if(cur<MANEUVER.cost)return {err:'Insufficient Stamina'};
+ const ms=effStat(c,'STR')>=effStat(c,'DEX')?'STR':'DEX',mod=modOf(effStat(c,ms)),bonus=Math.max(0,mod),left=cur-MANEUVER.cost;
+ let en=c.enemy?{...c.enemy}:null;if(!en){const hp=18+Math.floor(Math.random()*13);en={name:'Hostile',hp,maxHp:hp,shields:0,maxShields:0,dc:13}}
+ const r=dp(),total=r+mod+2,dc=enemyDC(en),hit=r===20||(r!==1&&total>=dc),roll={d20:r,mod:mod+2,total,dc,crit:r===20?'crit':r===1?'fumble':null,success:hit};
+ const dmg=hit?8+bonus+(r===20?6:0):0,hp=Math.max(0,en.hp-dmg);en={...en,hp};
+ const status=hp<=0?'Enemy Down':`Enemy HP ${hp}/${en.maxHp}`;
+ return {roll,left,stat:ms,enemy:hp<=0?null:en,dmg,tag:`[SYSTEM: Maneuver | ${MANEUVER.name} | Hit: ${total} vs DC ${dc}${hit?'':' (Miss)'} | Damage: ${dmg} | Stamina: ${left}/${stamMax(c)} | ${status}]`}}
 const SPELLS=[
  {id:'magic_missile',name:'Magic Missile',cost:4,kind:'attack',auto:true,dmg:'Force',desc:'Three darts of force that never miss.'},
  {id:'fireball',name:'Fireball',cost:12,kind:'attack',dmg:'Fire',desc:'A roaring blast. Half damage on a miss.'},
@@ -2009,7 +2040,7 @@ function gearBonus(label,camp,w){const L=getLoadout(camp)||{},a=L.apparel;let b=
  if((label==='Attack'||label==='Gunnery')&&w){if(w.vehicle)b+=Math.floor((w.fp-10)/2)+((camp.bonus&&camp.bonus.Piloting)||0);else b+=Math.min(6,atkBonus(w.fp)+Math.floor((w.rof||0)/7))}
  if(label==='Piloting'&&L.vehicle)b+=Math.floor((L.vehicle.spd-10)/2)+((camp.bonus&&camp.bonus.Piloting)||0);
  if(a&&(label==='Stealth'||label==='Acrobatics'))b-=armorPen(a.enc);return b}
-const healAmt=n=>/greater/i.test(n)?25:/stim/i.test(n)?8:/bandage/i.test(n)?6:12;
+const healAmt=n=>/greater/i.test(n)?25:/stim/i.test(n)?8:/bandage|salve/i.test(n)?6:12;
 function resolveAttack(camp,roll,w){
  let en=camp.enemy?{...camp.enemy}:null;
  if(!en){const L=getLoadout(camp)||{};if(camp.aboard&&camp.universe==='star_wars'&&L.vehicle){en=spawnEnemyVehicle(camp)}
@@ -2118,7 +2149,7 @@ const CHECKS=[
  [/cast|blast|force push|force/i,'MAG','Spellcraft / Force',13],
  [/attack|strike|stab|slash|shoot|fire |swing|duel|fight|punch|\bhit\b|kill|throw|hurl|\blob\b|toss/i,'ATK','Attack',13]
 ];
-const HEALRE=/medpac|potion|healing draught|draught|bacta|bandage|stim/i;
+const HEALRE=/medpac|potion|healing draught|draught|bacta|bandage|stim|salve/i;
 function detectCheck(text){
  if(HEALRE.test(text)||/\?\s*$/.test(text))return null;
  for(const [re,stat,label,dc] of CHECKS){if(re.test(text)){
@@ -2257,7 +2288,7 @@ Each reply: 2-4 paragraphs of prose, then a final fenced JSON block exactly like
 - dynamic_actions: 3-5 short, era-specific actions the player could take in the current room or event.
 - Loot: whenever the player gains an item or money, embed an inline tag in the prose exactly like [LOOT: Item Name | QUALITY: 0-10 | CREDITS: n] (CREDITS: 0 for plain items; for pure money use [LOOT: Credits | CREDITS: n]). Leave items_awarded empty. The app strips these tags and updates the pack and wallet.`;
  const dictBlock=dict.filter(e=>inScope(e,camp)).map(dictText).join('\n');
- const st=`CHARACTER STATE: ${camp.name}, ${camp.species||'unknown species'} ${camp.arche} from ${camp.homeworld||'parts unknown'}. HP ${camp.hp}/${camp.maxHp}, ${u.sec} ${camp.sec}/${camp.maxSec}. Stats ${STATS.map(s=>statLabel(camp.universe,s).abbr+' '+camp.stats[s]).join(', ')}. Active quests: ${camp.quests.map(q=>q.title).join('; ')}.`;
+ const st=`CHARACTER STATE: ${camp.name}, ${camp.species||'unknown species'} ${camp.arche} from ${camp.homeworld||'parts unknown'}. HP ${camp.hp}/${camp.maxHp}, ${secView(camp).label} ${secView(camp).cur}/${secView(camp).max}. Stats ${STATS.map(s=>statLabel(camp.universe,s).abbr+' '+camp.stats[s]).join(', ')}. Active quests: ${camp.quests.map(q=>q.title).join('; ')}.`;
  // history
  const msgs=[];
  camp.feed.forEach(e=>{
@@ -2452,19 +2483,28 @@ const StatGrid=({stats,cols,tip})=><div className={'grid gap-1 mt-1.5 '+(cols===
 const DList=({label,items})=>items&&items.length?<div className="text-xs mt-1"><span className="muted">{label+':'}</span> {items.join(' · ')}</div>:null;
 const THR_TIP={THR:'Threat',INF:'Influence',RES:'Resources'};
 function GearCard({it,fav,onFav,onEdit,onDelete}){
+const[flipped,setFlipped]=useState(false);
  const[confirmDel,setConfirmDel]=useState(false);const[showQ,setShowQ]=useState(false);const[tier,setTier]=useState(5);const[q,setQ]=useState(2);const[m,setM]=useState(1);
  const unit=UNIT[it.uni];
  const sc=scaleItem(it,tier);
  const stats=it.cat==='weapon'?[['FP',sc.fp],['RoF',sc.rof],['WT',sc.wt]]:it.cat==='armor'?[['AR',sc.ar],['ER',sc.er],['ENC',sc.enc]]:it.cat==='vehicle'?[['ARM',sc.arm],['SHD',sc.shd],['FP',sc.fp],['SPD',sc.spd],['CAP',sc.cap]]:it.cat==='gear'&&it.util!=null?[['WT',it.wt],['UTIL',it.util]]:null;
- const hasWorth=it.cat==='weapon'||it.cat==='armor'||it.cat==='vehicle'||it.cat==='gear';
+ const hasWorth=it.cat==='weapon'||it.cat==='armor'||it.cat==='vehicle'||(it.cat==='gear'&&it.worth>0);
  const worth=it.cat==='armor'?it.worth:sc.worth;
  const mech=it.cat==='weapon'||it.cat==='armor'?mechNotes(it,sc):(it.note||'');
- const hasQ=it.cat==='armor'||it.cat==='weapon'||it.cat==='vehicle'||it.cat==='gear';
+ const hasQ=!it.dossier&&(it.cat==='armor'||it.cat==='weapon'||it.cat==='vehicle'||it.cat==='gear');
  const et=eraTags(it);
+ if(it.dossier&&flipped)return <div className="card p-2 mb-1.5"><div key="back" className="flipin">
+  <div className="flex items-start gap-1.5"><div className="head text-base leading-tight flex-1 min-w-0" style={{paddingTop:3}}><FavBtn fav={fav} onFav={onFav}/>{it.name} <span className="mono text-xs muted">· Dossier</span></div>
+   <button type="button" className="btn shrink-0" style={{minHeight:30,fontSize:'.78rem',padding:'0 .5rem'}} aria-label={'Back to summary for '+it.name} onClick={()=>setFlipped(false)}>↶ Front</button></div>
+  <div className="mt-1.5 text-sm"><div><b>Dossier:</b> {it.dossier}</div>
+   <div className="text-xs mt-1"><span className="muted">Blueprint archive:</span> <b>*{stripStar(it.archive)}</b></div>
+   {it.manufacturer&&<div className="text-xs mt-1"><span className="muted">Origin:</span> <b>{it.manufacturer}</b></div>}</div>
+  <button type="button" className="btn mt-2 w-full" style={{minHeight:30,fontSize:'.8rem'}} onClick={()=>setFlipped(false)}>↶ Front</button></div></div>;
  return <div className="card p-2 mb-1.5">
   <div className="flex items-start gap-1.5">
    <FavBtn fav={fav} onFav={onFav}/>
    <div className="head text-base leading-tight flex-1 min-w-0" style={{paddingTop:3}}>{it.name}</div>
+   {it.dossier&&<button type="button" className="btn shrink-0" style={{minHeight:30,fontSize:'.78rem',padding:'0 .5rem'}} aria-label={'Open dossier for '+it.name} onClick={()=>setFlipped(true)}>Dossier ↷</button>}
    {hasWorth&&<div className="text-xs text-right shrink-0" style={{paddingTop:5}}><span className="muted">Worth:</span> <b>{fmt(worth)} {unit}</b></div>}</div>
   <div className="flex flex-wrap gap-1 mt-1">
    {it.category&&<Chip cls="acc">{catLabel(it.category,it.uni)}</Chip>}
@@ -2477,7 +2517,7 @@ function GearCard({it,fav,onFav,onEdit,onDelete}){
    {it.cat==='weapon'&&<span>Skill: <b>{it.skill}</b></span>}
    {it.cat==='vehicle'&&<span>Cost: <b>{it.pts} pt{it.pts>1?'s':''}</b> · Cargo bay: <b>{cargoMax(it.cap)}</b>{it.uni==='star_wars'&&it.fp>0&&<> · Hull <b>{hullMax(it)}</b> · Shields <b>{shdMax(it)}</b></>}</span>}
    {it.role&&<span>Role: <b>{it.role}</b></span>}</div>
-  <div className="mt-1 text-sm">{it.lore}{mech&&<div className="mt-0.5 text-xs muted"><b>{it.role?'Notes:':'Combat:'}</b> {mech}</div>}</div>
+  <div className="mt-1 text-sm">{it.summary||it.lore}{mech&&<div className="mt-0.5 text-xs muted"><b>{it.role?'Notes:':'Combat:'}</b> {mech}</div>}</div>
   {hasQ&&<button type="button" className="mono text-xs mt-1.5 muted" style={{background:'none',border:'none',padding:'2px 0',cursor:'pointer',textDecoration:'underline'}} aria-expanded={showQ} onClick={()=>setShowQ(!showQ)}>{showQ?'▴ Hide Quality / Crafting':'▾ Preview Quality / Crafting'}</button>}
   {hasQ&&showQ&&(it.cat==='armor'?<div className="mt-1 card2 p-2"><div className="text-xs muted mb-1">Quality / material preview (0–10)</div><ApparelInspector it={it} q={q} m={m} setQ={setQ} setM={setM}/></div>
    :<div className="mt-1 card2 p-2"><div className="text-xs flex justify-between"><span className="muted">Quality / material tier</span><b>Tier {tier} · {COMPENDIUM.quality[tier]}</b></div>
@@ -2563,8 +2603,8 @@ const CAT_ALL={weapon:'All Weapons',armor:'All Apparel',vehicle:'All Vehicles',g
 const CAT_LABEL={cybernetic:'Cybernetics',hospitality:'Provisions',ammo:'Ammunition',weapon_mod:'Illegal Mods',blaster_pistol:'Pistols',hold_out:'Hold-Outs',blaster_rifle:'Rifles',sniper_rifle:'Snipers',heavy_ordnance:'Heavy Ordnance',melee_blade:'Melee',grenade:'Grenades',
  outerwear:'Coats & Outerwear',tunic:'Tunics',trousers:'Pants',footwear:'Boots',armor_plate:'Armor Plating',field_pack:'Packs',
  speeder_bike:'Speeders',landspeeder:'Landspeeders',walker:'Walkers',repulsor_tank:'Tanks',starfighter:'Starfighters',patrol_gunship:'Gunships',light_freighter:'Freighters',heavy_transport:'Heavy Transports',
- medical:'Medical',slicing:'Slicing & Tools',demolitions:'Demolitions',survival:'Survival',ship_parts:'Ship Parts'};
-const CAT_LABEL_FR={cybernetic:'Arcane Relics',blaster_rifle:'Bows & Crossbows',grenade:'Thrown Alchemy',armor_plate:'Armor & Shields',speeder_bike:'Mounts',landspeeder:'Wagons',light_freighter:'Vessels',slicing:'Tools'};
+ medical:'Medical',slicing:'Slicing & Tools',demolitions:'Demolitions',survival:'Survival',ship_parts:'Ship Parts',ancient_tech:'Ancient Tech',relic:'Relics'};
+const CAT_LABEL_FR={weapon_mod:'Illicit Concoctions',medical:'Potions & Remedies',cybernetic:'Arcane Relics',blaster_rifle:'Bows & Crossbows',grenade:'Thrown Alchemy',armor_plate:'Armor & Shields',speeder_bike:'Mounts',landspeeder:'Wagons',light_freighter:'Vessels',slicing:'Tools'};
 const catLabel=(k,uni)=>(uni==='forgotten_realms'&&CAT_LABEL_FR[k])||CAT_LABEL[k]||k;
 const ERA_NAME=Object.fromEntries([...Object.entries(ERA_KEY_OF.star_wars).map(([id,key])=>[key,ERAS.star_wars.find(e=>e.id===id).name]),...ERAS.forgotten_realms.map(e=>[e.id,e.name])]);
 const eraKey=(uni,id)=>uni==='star_wars'?ERA_KEY_OF.star_wars[id]:id;
@@ -2805,7 +2845,8 @@ function AttackView({camp,targets,sel,setSel,busy,onQuick,onStrike,onSpell,onBac
     {open&&<div className="grid grid-cols-2 gap-1.5 p-2 pt-0">
      <button type="button" className="btn" disabled={busy} onClick={()=>onQuick(t)}>[ Quick Attack ]</button>
      {canF&&!t.veh&&!camp.aboard&&<button type="button" className="btn" disabled={busy||forceCur(camp)<FORCE_ATK_COST} title={'Costs '+FORCE_ATK_COST+' Energy, DIS + 4 kinetic damage'} onClick={()=>onStrike(t)}>[ Force Strike ]</button>}
-     {magicCan(camp)&&!t.veh&&!camp.aboard&&SPELLS.filter(s=>s.kind==='attack').map(s=><button key={s.id} type="button" className="btn" data-spell-target={s.id} disabled={busy||magicCur(camp)<s.cost} title={s.desc+' Costs '+s.cost+' Spell Energy.'} onClick={()=>onSpell(s.id,t)}>[ {s.name} ]</button>)}</div>}</div>})}</div>}
+     {magicCan(camp)&&!t.veh&&!camp.aboard&&SPELLS.filter(s=>s.kind==='attack').map(s=><button key={s.id} type="button" className="btn" data-spell-target={s.id} disabled={busy||magicCur(camp)<s.cost} title={s.desc+' Costs '+s.cost+' Spell Energy.'} onClick={()=>onSpell(s.id,t)}>[ {s.name} ]</button>)}
+      {stamOn(camp)&&!t.veh&&!camp.aboard&&<button type="button" className="btn" data-maneuver-target={MANEUVER.id} disabled={busy||stamCur(camp)<MANEUVER.cost} title={MANEUVER.desc+' Costs '+MANEUVER.cost+' Stamina.'} onClick={()=>onSpell('power_strike',t)}>[ {MANEUVER.name} ]</button>}</div>}</div>})}</div>}
 /* ================= PHASE 2: casino, rumors, camp rest, narrative tone ================= */
 const d100=()=>(d20()-1)*5+((d20()-1)%5)+1;
 const CUR=c=>c&&c.universe==='star_wars'?'Credits':'Gold';
@@ -2862,9 +2903,9 @@ function rumorPool(c){const pb=c.universe==='star_wars'?planetBrief(c):null,wher
    {title:'Derelict Freighter Sighting',text:`Dockhands swear a derelict freighter is drifting through the ${reg} lanes with hatches open and its transponder dead. Salvage goes to the first crew aboard.`,range:[4,9]},
    {title:'Syndicate Bounty',text:`A syndicate has posted a bounty on a defector last seen near ${place}. Payment is due on delivery, and other hunters are already looking.`,range:[3,7]},
    {title:'Smuggler Drop',text:`A smuggler is dumping cargo outside ${place} before the next ${ctl} inspection. The drop point is being sold to anyone who asks.`,range:[2,6]}]}
- return [{title:'Ruined Dungeon',text:`A hunter in the common room describes ruins under the old hills near ${where}: doors forced from the inside and treasure still unclaimed.`,range:[4,10]},
-  {title:'Goblin Ambush Road',text:`Goblins have been ambushing travelers on the road out of ${where}. The watch is paying coin for proof their camp is gone.`,range:[3,8]},
-  {title:'Missing Merchant Caravan',text:`A merchant caravan left ${where} a tenday ago and never arrived. Its owner pays well for news, survivors or the lost cargo.`,range:[5,12]},
+ return [{title:'Dungeon Ruins',text:`A hunter in the common room describes ruins under the old hills near ${where}: doors forced from the inside and treasure still unclaimed.`,range:[4,10]},
+  {title:'Forest Ambush',text:`Goblins have been ambushing travelers on the road out of ${where}. The watch is paying coin for proof their camp is gone.`,range:[3,8]},
+  {title:'Missing Caravan',text:`A merchant caravan left ${where} a tenday ago and never arrived. Its owner pays well for news, survivors or the lost cargo.`,range:[5,12]},
   {title:'Sunken Crypt',text:`Fishers talk of a crypt exposed by the low water outside ${where}, warded and humming after dark.`,range:[4,9]}]}
 function rollRumor(c){const pool=rumorPool(c),r=seeded(c.id+'|rumor|'+dayOf(c)+'|'+(c.turn||0)+'|'+c.feed.length+'|'+(c.rumors||[]).length),have=(c.rumors||[]).map(x=>x.title);
  let i=Math.floor(r()*pool.length);for(let k=0;k<pool.length&&have.includes(pool[i].title);k++)i=(i+1)%pool.length;
@@ -2898,7 +2939,7 @@ const BANTER=[
  n=>`${n} tells a half-true story about a past job gone wrong, and for once nobody interrupts.`,
  n=>`${n} keeps the first watch and mutters that trust is earned a night at a time.`];
 const banterLine=(c,cm)=>{const r=seeded(c.id+'|banter|'+dayOf(c)+'|'+(c.turn||0)),f=BANTER[Math.floor(r()*BANTER.length)];return `CAMP SCENE: ${f(cm.name)}`};
-const AMBUSHERS={star_wars:['Scavenger Raider','Wasteland Marauder','Night Prowler'],forgotten_realms:['Goblin Raider','Bandit Cutthroat','Prowling Wolf']};
+const AMBUSHERS={star_wars:['Scavenger Raider','Wasteland Marauder','Night Prowler'],forgotten_realms:['Goblin Raider','Bandit Cutthroat','Dire Wolf','Cutpurse']};
 function restAmbush(c){const r=seeded(c.id+'|ramb|'+dayOf(c)+'|'+(c.turn||0)),l=AMBUSHERS[c.universe]||AMBUSHERS.forgotten_realms,name=l[Math.floor(r()*l.length)],hp=20+Math.floor(r()*7);
  const id='camp-ambush-'+(c.turn||0)+'-'+nslug(name),npc={id,name,role:'Night Raider',ac:13,hp,maxHp:hp,hostile:true};
  return {npc,c:{...c,scene_npcs:[...(Array.isArray(c.scene_npcs)?c.scene_npcs:[]).filter(n=>n.id!==id),npc],sdead:(c.sdead||[]).filter(x=>x!==id),feed:[...c.feed,{id:uid(),type:'combat',text:`[AMBUSH: ${name} attacks the camp in the night!]`}]}}}
@@ -3145,7 +3186,7 @@ function LoadoutBuilder({uni,eraId,L,setL,credLeft,ptsLeft,conv,cash,onConv}){
  const rows=slot?eligible(uni,slot,eraId).filter(i=>!q.trim()||[i.name,i.type,i.skill||'',i.category?catLabel(i.category,i.uni):'',i.manufacturer||'',...i.tags].join(' ').toLowerCase().includes(q.trim().toLowerCase())):[];
  const setQM=(k,v)=>{const it=DBMAP[L.apparel.id],cur=customizeApparel(it,L.apparel.q,L.apparel.m).price,na={...L.apparel,[k]:v},np=customizeApparel(it,na.q,na.m).price;
   if(np-cur>credLeft){setMsg('Not enough '+unit.toLowerCase()+' for that upgrade (use the converter above).');return}setMsg('');setL(l=>({...l,apparel:na}))};
- const label=k=>k==='vehicle'&&uni!=='star_wars'?'Assigned Mount / Vehicle':SLOT_DEFS.find(x=>x[0]===k)[1];
+ const label=k=>k==='vehicle'&&uni!=='star_wars'?'Mount Slot (Riding Horse, Warhorse, Wagon)':SLOT_DEFS.find(x=>x[0]===k)[1];
  return <div>
   <div className="card p-2 mb-3"><div className="flex items-center gap-2 justify-between flex-wrap">
    <button type="button" className="btn" style={{minHeight:40}} disabled={credLeft<step} onClick={()=>onConv(-1)}>−{fmt(step)} {ab} (+1 Pt)</button>
@@ -3374,7 +3415,7 @@ function Dossier({camp,onUse,onStat}){
   {forceOn(camp)&&<div className="card2 mb-3 p-2" aria-label="Force sensitivity"><div className="mono text-xs" style={{color:'var(--text)',opacity:.9}}>Midi-chlorians: {fmt(forceMC(camp))} · {forceTier(camp)}</div>
    {forceCan(camp)&&<div className="mt-1"><div className="flex justify-between mono text-xs mb-1"><span className="label">Force Energy</span><span>{forceCur(camp)}/{forceMax(camp)}</span></div><Bar v={forceCur(camp)} max={forceMax(camp)} color="#8b5cf6"/></div>}
    {!forceCan(camp)&&<div className="text-xs mt-1" style={{color:'var(--text)',opacity:.85}}>Not Force-sensitive: your energy reserve powers shields and tech only. Raise Discipline to 5 or find a path to the Force.</div>}</div>}
-  {magicOn(camp)&&<div className="card2 mb-3 p-2" data-spell-card aria-label="Spellcasting">{magicCan(camp)?<div><div className="flex justify-between mono text-xs mb-1"><span className="label">Spell Energy ({magicStat(camp)})</span><span>{magicCur(camp)}/{magicMax(camp)}</span></div><Bar v={magicCur(camp)} max={magicMax(camp)} color="#8b5cf6"/>{camp.ward>0&&<div className="mono text-xs mt-1" data-ward>Ward {camp.ward}</div>}</div>:<div className="text-xs" style={{color:'var(--text)',opacity:.85}}>Not a spellcaster: your Mana reserve is physical stamina and grit. Raise INT or WIS to 5, or find a path to magic, to cast spells.</div>}</div>}
+  {magicOn(camp)&&<div className="card2 mb-3 p-2" data-spell-card aria-label="Spellcasting">{magicCan(camp)?<div><div className="flex justify-between mono text-xs mb-1"><span className="label">Spell Energy ({magicStat(camp)})</span><span>{magicCur(camp)}/{magicMax(camp)}</span></div><Bar v={magicCur(camp)} max={magicMax(camp)} color="#8b5cf6"/>{camp.ward>0&&<div className="mono text-xs mt-1" data-ward>Ward {camp.ward}</div>}</div>:<div className="text-xs" style={{color:'var(--text)',opacity:.85}}>Not a spellcaster: your reserve is Stamina, spent on Maneuvers such as Power Strike ({stamCur(camp)}/{stamMax(camp)}). It refills on a long rest.</div>}</div>}
   {camp.notes&&<div className="text-sm muted mb-3" style={{fontStyle:'italic'}}>{camp.notes}</div>}
   {camp.traits&&[['Flaws',camp.traits.flaws],['Perks',camp.traits.perks],['Fighting Styles',camp.traits.styles],['Skills',camp.traits.skills],['Languages',camp.traits.langs]].map(([t,a])=>a&&a.length>0&&<div key={t} className="mb-2"><div className="mono text-xs muted uppercase">{t}</div><div className="flex flex-wrap gap-1 mt-1">{a.map(x=><span key={x.name} className="badge" title={x.desc}>{x.name}{x.level?' Lv'+x.level:''}{x.choice?': '+x.choice:''}</span>)}</div></div>)}
   {(()=>{const L=getLoadout(camp);if(!L)return null;const rows=[['Primary',L.primary,x=>`FP ${x.fp} · RoF ${x.rof} · WT ${x.wt}`],['Sidearm',L.sidearm,x=>`FP ${x.fp} · RoF ${x.rof} · WT ${x.wt}`],['Apparel',L.apparel,x=>`AR ${x.ar} · ER ${x.er} · ENC ${x.enc} · absorbs ~${Math.floor((x.ar+x.er)/8)}`],['Vehicle',L.vehicle,x=>`ARM ${x.arm} · SHD ${x.shd} · FP ${x.fp} · SPD ${x.spd} · CAP ${vehCap(x)}`]].filter(r=>r[1]);
@@ -3942,6 +3983,10 @@ const[lootId,setLootId]=useState(null);
   await runDM(text,null,false,false)}
  async function castSpell(id,t){
   const c0=ref.current;if(busy||pending)return;
+  if(id==='power_strike'){if(c0.aboard||c0.dog){toast('Maneuvers cannot be used from a ship here');return}
+   const c1=t?engage(c0,t):c0,r=maneuverUse(c1);if(r.err){toast(r.err);return}
+   const text='I use '+MANEUVER.name+(t?' on '+t.name:''),add=[{id:uid(),type:'player',text,snap:mkSnap(c0)},{id:uid(),type:'roll',label:MANEUVER.name,stat:r.stat,sl:r.stat,mod:r.roll.mod,d20:r.roll.d20,total:r.roll.total,dc:r.roll.dc,crit:r.roll.crit,success:r.roll.success},{id:uid(),type:'combat',text:r.tag}];
+   setDrawer(null);commit({...c1,sec:r.left,enemy:r.enemy,...syncTgt(c1,r.enemy),turn:c0.turn+1,feed:[...c0.feed,...add]});await runDM(text,null,false,false);return}
   const sp=SPELLS.find(s=>s.id===id);if(!sp)return;
   if(sp.kind==='attack'&&(c0.aboard||c0.dog)){toast('Spells cannot be cast from a ship here');return}
   const c1=sp.kind==='attack'&&t?engage(c0,t):c0,r=spellCast(c1,id);if(r.err){toast(r.err);return}
@@ -4041,7 +4086,7 @@ const[lootId,setLootId]=useState(null);
     <button className="btn" style={{minHeight:38,minWidth:38,padding:0}} onClick={onExit} title="Main menu" aria-label="Main menu"><Ico n="home"/></button>
     <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1">
      <div><div className="flex justify-between text-xs mono"><span>VITALITY</span><span>{camp.hp}/{camp.maxHp}</span></div><Bar v={camp.hp} max={camp.maxHp} color="var(--bad)"/></div>
-     <div><div className="flex justify-between text-xs mono"><span>{u.sec.toUpperCase()}</span><span>{camp.sec}/{camp.maxSec}</span></div><Bar v={camp.sec} max={camp.maxSec} cls="sec" color="#38bdf8"/></div>
+     <div><div className="flex justify-between text-xs mono"><span>{secView(camp).label.toUpperCase()}</span><span>{secView(camp).cur}/{secView(camp).max}</span></div><Bar v={secView(camp).cur} max={secView(camp).max} cls="sec" color={magicOn(camp)?(magicCan(camp)?'#8b5cf6':'#d9a441'):'#38bdf8'}/></div>
     </div>
     <span className="badge acc hidden sm:inline-block"><CurChip u={u}/>{camp.currency}</span>
     {camp.universe==='star_wars'&&<button className="btn" data-ship-open aria-disabled={!hasShip(camp)} style={{minHeight:38,minWidth:38,padding:0,opacity:hasShip(camp)?1:.45}} onClick={openNav} title={hasShip(camp)?'Ship and Travel':'Ship and Travel: no starship available'} aria-label="Open ship and travel"><Ico n="radar"/></button>}
@@ -4122,19 +4167,38 @@ function Section({title,summary,children,defaultOpen}){
   <button type="button" className="w-full flex justify-between items-center gap-2 p-3 head text-xl text-left" aria-expanded={open} onClick={()=>setOpen(!open)}>
    <span className="min-w-0">{title} {summary&&<span className="muted text-xs" style={{fontFamily:'var(--ffb)',letterSpacing:0,textTransform:'none'}}>{summary}</span>}</span><span>{open?'▾':'▸'}</span></button>
   {open&&<div className="p-3 pt-0">{children}</div>}</div>}
+const STAT_INFO={
+ star_wars:{
+  STR:['Might','Governs physical power, melee damage bonuses, heavy weapon carrying capacity, and athletics/unarmed checks.','Modifier: floor((score - 10) / 2), added to every check on this stat.','Athletics, Unarmed, Melee Weapons'],
+  DEX:['Agility','Governs ranged blaster accuracy, reflex evasion, stealth, piloting precision, and reaction timing.','Modifier: floor((score - 10) / 2). Also feeds vehicle evasion and piloting checks.','Blaster Weapons, Stealth, Piloting, Acrobatics'],
+  CON:['Resilience','Governs maximum Vitality (HP), toxin/hazard resistance, physical endurance, and environmental stamina.','Modifier: floor((score - 10) / 2), applied to Vitality, hazard saves and endurance.','Endurance, Hazard Saves, Toxin Resistance'],
+  INT:['Technical','Governs slicing/hacking, mechanical repairs, droid maintenance, explosive handling, and starship subsystem tuning.','Modifier: floor((score - 10) / 2). Also drives Tinkering / Slicing checks.','Slicing, Repair, Droid Maintenance, Demolitions'],
+  WIS:['Discipline','Governs mental resilience against fear and psychological distress, Force pool/channeling capacity (if Force-sensitive), and concentration under fire.','Modifier: floor((score - 10) / 2). Midi-chlorians = score x 1,000; Force Energy pool = score x 5 (Force use unlocks at 5+ or after awakening).','Force Powers, Willpower, Concentration, Perception'],
+  CHA:['Presence','Governs dialogue checks, haggling/shop vendor discounts, NPC morale, intimidation, and leadership in crew combat.','Modifier: floor((score - 10) / 2), added to dialogue checks and vendor negotiation.','Persuasion, Intimidation, Deception, Leadership']},
+ forgotten_realms:{
+  STR:['Strength','Natural athleticism, melee attack/damage rolls, carry load, and physical force checks.','Modifier: floor((score - 10) / 2), added to melee attacks and damage.','Athletics, Melee Attacks, Grapple, Force Doors'],
+  DEX:['Dexterity','Armor Class (AC) bonus, ranged weapon accuracy, initiative speed, stealth, and acrobatics.','Modifier: floor((score - 10) / 2), added to AC, ranged attacks and initiative.','Stealth, Acrobatics, Sleight of Hand, Ranged Attacks'],
+  CON:['Constitution','Maximum Hit Points, stamina, poison resistance, and concentration saves.','Modifier: floor((score - 10) / 2), applied to HP, poison saves and concentration.','Endurance, Poison Saves, Concentration'],
+  INT:['Intelligence','Arcane spellcasting ability, investigation, arcana/nature lore, and tactical deduction.','Modifier: floor((score - 10) / 2). Wizards cast with it.','Arcana, Investigation, Nature, History'],
+  WIS:['Wisdom','Divine spellcasting, perception, insight, survival checks, and mental willpower saves.','Modifier: floor((score - 10) / 2). Clerics, druids and rangers cast with it.','Perception, Insight, Survival, Medicine'],
+  CHA:['Charisma','Social persuasion, deception, vendor prices, presence, and innate spellcasting.','Modifier: floor((score - 10) / 2). Bards, sorcerers and warlocks cast with it.','Persuasion, Deception, Intimidation, Performance']}};
 function StatsBlock({uni,cls,stats,onStat,onSet,left,statNet,hpMod}){
+ const[info,setInfo]=useState(null);
  const A=cls&&CLASSES[uni].find(c=>c.name===cls),u=UNI[uni];
  const presetNet=A?STATS.reduce((a,k)=>a+(A.stats[k]-STAT_BASE),0):0;
  const summary=`allocated ${sign(statNet)} pts · `+STATS.map(k=>statLabel(uni,k).abbr+' '+stats[k]).join(' ');
  return <Section title="Stats" summary={summary}>
   <div className="text-xs muted mb-2">Every stat starts at {STAT_BASE}. Raising a stat spends 1 point per step from the shared pool; lowering it refunds 1 (range {STAT_MIN}–{STAT_MAX}{uni==='star_wars'?'; Discipline may drop to 4 to start Non-Sensitive':''}).</div>
   {STATS.map(k=>{const L=statLabel(uni,k),v=stats[k];
-   return <div key={k} className="flex items-center gap-2 py-1" style={{borderBottom:'1px dashed var(--line)'}}>
-    <span className="flex-1 head text-lg min-w-0">{L.name}</span>
+   return <React.Fragment key={k}><div className="flex items-center gap-2 py-1" style={{borderBottom:'1px dashed var(--line)'}}>
+    <span className="flex-1 head text-lg min-w-0 flex items-center gap-1.5"><span className="truncate">{L.name}</span>
+     <button type="button" data-stat-info={k} className="mono shrink-0" aria-expanded={info===k} aria-label={'About '+L.name} onClick={()=>setInfo(info===k?null:k)} style={{minHeight:28,minWidth:34,padding:'0 .3rem',fontSize:'.7rem',letterSpacing:'.04em',border:'1px solid '+(info===k?'var(--accent)':'var(--line)'),borderRadius:'var(--r)',color:info===k?'var(--accent)':'var(--muted, var(--text))',background:'transparent'}}>[ ? ]</button></span>
     <button type="button" className="btn" style={{minHeight:36,padding:'0 .8rem'}} aria-label={'Decrease '+L.name} disabled={v<=statMin(uni,k)} onClick={()=>onStat(k,-1)}>−</button>
     <span className="head text-2xl text-center" style={{width:38}}>{v}</span>
     <button type="button" className="btn" style={{minHeight:36,padding:'0 .8rem'}} aria-label={'Increase '+L.name} disabled={v>=STAT_MAX||left<=0} onClick={()=>onStat(k,1)}>+</button>
-    <span className="mono text-sm accent text-right" style={{width:34}}>{sign(modOf(v))}</span></div>})}
+    <span className="mono text-sm accent text-right" style={{width:34}}>{sign(modOf(v))}</span></div>
+    {info===k&&(()=>{const d=(STAT_INFO[uni]||STAT_INFO.forgotten_realms)[k];return <div data-stat-info-card={k} className="text-xs py-2 px-2.5 mb-1" style={{border:'1px solid var(--line)',borderRadius:'var(--r)',background:'rgba(127,127,127,.06)',lineHeight:1.5}}>
+     <div><b>{L.abbr} ({d[0]}).</b> {d[1]}</div><div className="mono mt-1" style={{opacity:.85}}>{d[2]}</div><div className="mt-1"><span className="label">Key skills</span> {d[3]}</div></div>})()}</React.Fragment>})}
   {uni==='star_wars'&&<div className="mono text-xs mt-2" style={{color:'var(--text)',opacity:.9}}>Midi-chlorians: {fmt(stats.WIS*1000)} · {forceTierOf(stats.WIS)}{stats.WIS<5?' · Force actions stay locked until you awaken':''}</div>}
   <div className="grid grid-cols-2 gap-2 mt-3 text-sm"><div className="card p-2">Base HP <b>{A?Math.max(10,A.hp+hpMod):'—'}</b></div><div className="card p-2">{u.sec} <b>{A?A.sec:'—'}</b></div></div>
   <div className="flex gap-2 flex-wrap mt-3">
@@ -4318,7 +4382,7 @@ function cargoCmd(c,text){
   const sealed=q.stage==='hold';
   return {...c,currency:(c.currency||0)+CARGO_REWARD,cargo:(c.cargo||[]).filter(x=>!x.crate),cargoQ:{...q,stage:'delivered',sealed},feed:[...c.feed,S1(`[SYSTEM: Contract Complete | +${CARGO_REWARD.toLocaleString('en-US')} credits | Client: ${who}${sealed?'':' | Seal broken: '+who+' demands the missing relics'}]`)]}}
  return null}
-function newCamp(a){const c=newCampBase(a),mod=a.era.mods[a.mi];return a.uni==='star_wars'&&mod&&mod.cargo?cargoSetup(c,a.era):c}
+function newCamp(a){let c=newCampBase(a);const mod=a.era.mods[a.mi];if(a.uni==='forgotten_realms'){const m=magicCan(c)?magicMax(c):stamMax(c);c={...c,sec:m,maxSec:m}}return a.uni==='star_wars'&&mod&&mod.cargo?cargoSetup(c,a.era):c}
 
 /* ============================== APP ============================== */
 function App(){
